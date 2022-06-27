@@ -10,17 +10,17 @@
 * - note: the estimated coefficients in the mean equation correspond to
 *	values \hat{\beta_{`var'}} = (1-\rho)[\phi_{`var'}], therefore reaction
 *	coefficients \phi_{`var'} are identified using the do-file
-*	"/stata/do/coef_ident.do" as
+*	"/do/coef_ident.do" as
 *	\phi_{`var'}=\hat{\beta_{`var'}}/(1-\hat{\rho})
 *
 * - uses files
-*	/stata/data/out/Data.dta
+*	/data/out/Data.dta
 *
 * - saves files
-*	/stata/log/do_model `c(current_date)'.smcl
+*	/log/do_model `c(current_date)'.smcl
 *
 * - saves figures
-*	/stata/figure/volatility_`sample'.`format'
+*	/figure/volatility_`sample'.`format'
 *
 * 	where
 *		`var' = {\pi,x}
@@ -40,16 +40,11 @@ macro drop _all
 program drop _all
 
 * Defining a global for current path
-if c(username) == "Narek" {
-	global path "E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation"
-}
-if c(username) == "apple" {
-	global path "/Users/apple/Dropbox/Discretion_vs_Committment/RECENT VERSION"
-}
+global path "INSERT-PATH-HERE"
 
 * Save logs
 capture log close
-log using "${path}/stata/log/model `c(current_date)'.smcl", replace
+log using "${path}/log/model `c(current_date)'.smcl", replace
 
 * Defining a global for whole sample
 global Full_Sample "date>=tq(1967q1) & date<=tq(2005q4)"
@@ -70,12 +65,12 @@ cd "${path}"
 
 * ==============================================================================
 
-use "${path}/stata/data/out/Data.dta",clear
+use "${path}/data/out/Data.dta",clear
 
 * Replacing missing VIX with VXO (uses old methodology)
 replace VIX = VXO if missing(VIX)
 
-do "${path}/stata/do/coef_ident.do"
+do "${path}/do/coef_ident.do"
 
 * ================================= Full Sample ================================
 
@@ -193,8 +188,8 @@ replace sqrt_h = sqrt(h) if ${Full_Sample}
 drop eps h
 
 twoway (tsline res, lcolor(navy) lwidth(medthick)) (tsline sqrt_h, lcolor(maroon) lwidth(thick)) if ${Full_Sample}, yline(0) yscale(range(-4 8)) ylabel(-4(2)8, angle(horizontal)) ttitle("") tlabel(, format(%tqCY)) tmtick(##5) title("") scheme(s1mono) name(volatility_fullsample,replace) // Volatility of policy shocks
-graph export "${path}/stata/figure/volatility_fullsample.eps", as(eps) preview(on) replace
-graph export "${path}/stata/figure/volatility_fullsample.pdf", as(pdf) replace
+graph export "${path}/figure/volatility_fullsample.eps", as(eps) preview(on) replace
+graph export "${path}/figure/volatility_fullsample.pdf", as(pdf) replace
 
 drop res sqrt_h
 
@@ -216,8 +211,8 @@ foreach subsample in Pre_Volcker Volcker Greenspan {
 
 *twoway (tsline sqrt_eps2) (tsline sqrt_h, lwidth(medthick)) if ${Full_Sample}, tline(1979q3 1987q3, lcolor(black) lpattern(dot)) ttitle("") tlabel(, format(%tqCY)) title("Volatility of policy shocks") note(Note: Vertical lines represent Volcker's and Greenspan's appointment as the Fed Chairman, span margin(medium)) name(volatility_subsamples,replace)
 twoway (tsline res, lcolor(navy) lwidth(medthick)) (tsline sqrt_h, lcolor(maroon) lwidth(thick)) if ${Full_Sample}, tline(1979q3 1987q3, lcolor(black) lpattern(dot)) yline(0) yscale(range(-6 4)) ylabel(-6(2)4, angle(horizontal)) ttitle("") tlabel(, format(%tqCY)) tmtick(##5) title("") scheme(s1mono) name(volatility_subsamples1,replace) // Volatility of policy shocks
-graph export "${path}/stata/figure/volatility_subsamples.eps", as(eps) preview(on) replace
-graph export "${path}/stata/figure/volatility_subsamples.pdf", as(pdf) replace
+graph export "${path}/figure/volatility_subsamples.eps", as(eps) preview(on) replace
+graph export "${path}/figure/volatility_subsamples.pdf", as(pdf) replace
 
 drop res sqrt_h
 */
@@ -237,8 +232,8 @@ replace res = eps
 replace sqrt_h = sqrt(h)
 
 twoway (tsline res, lcolor(navy) lwidth(medthick)) (tsline sqrt_h, lcolor(maroon) lwidth(thick)) if ${Greenspan}, yline(0) ylabel(,angle(horizontal)) ttitle("") tlabel(, format(%tqCY)) tmtick(##5) title("") scheme(s1mono) name(volatility_greenspan,replace) // Volatility of policy shocks
-graph export "${path}/stata/figure/volatility_greenspan.eps", as(eps) preview(on) replace
-graph export "${path}/stata/figure/volatility_greenspan.pdf", as(pdf) replace
+graph export "${path}/figure/volatility_greenspan.eps", as(eps) preview(on) replace
+graph export "${path}/figure/volatility_greenspan.pdf", as(pdf) replace
 
 drop eps res h sqrt_h
 
@@ -268,7 +263,7 @@ label var db "Discretionary"
 
 *twoway (bar rb date if ${Greenspan}) (bar db date if ${Greenspan}) (line df date if ${Greenspan}, lcolor(black) lwidth(medthick)), ttitle("") tlabel(, format(%tqCY)) ytitle("%") name(g1,replace)
 twoway (bar df date if ${Greenspan} & ((rb < 0 & db < 0) | (rb > 0 & db > 0)), lcolor(sand) fcolor(sand)) (bar rb date if ${Greenspan}, lcolor(maroon) fcolor(maroon)) (bar db date if ${Greenspan} & ((rb > 0 & db < 0) | (rb < 0 & db > 0)), lcolor(sand) fcolor(sand)) (line df date if ${Greenspan}, lcolor(black) lwidth(medthick)), yscale(titlegap(3)) ttitle("") tlabel(, format(%tqCY)) tmtick(##5) ytitle("%", orientation(horizontal)) yline(0) legend(order(2 "Rule-based" 3 "Discretionary" 4 "Change of the Fed funds rate")) scheme(s1mono) name(ffr_rb_db_decomposition,replace)
-graph export "${path}/stata/figure/ffr_rb_db_decomposition.pdf", as(pdf) replace
+graph export "${path}/figure/ffr_rb_db_decomposition.pdf", as(pdf) replace
 */
 
 * ============================== Robustness checks =============================

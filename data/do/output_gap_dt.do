@@ -10,18 +10,13 @@ macro drop _all
 program drop _all
 
 * Defining a global for current path
-if c(username) == "Narek" {
-	global path "E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation"
-}
-if c(username) == "apple" {
-	global path "/Users/apple/Dropbox/Discretion_vs_Committment/RECENT VERSION"
-}
+global path "INSERT-PATH-HERE"
 
 cd "${path}"
 
 * =========================== Import Real GDP gap data =========================
 
-import excel "${path}/stata/data/in/ROUTPUTQvQd.xlsx", sheet("ROUTPUT") firstrow clear
+import excel "${path}/data/in/ROUTPUTQvQd.xlsx", sheet("ROUTPUT") firstrow clear
 
 qui destring ROUTPUT*, replace ignore(`"#N/A"')
 
@@ -29,7 +24,7 @@ gen date = yq(real(substr(DATE,1,4)),real(substr(DATE,-1,1)))
 tsset date, quarterly
 drop DATE
 
-merge 1:1 date using "${path}/stata/data/tmp/Data_RGDP_pr.dta", nogenerate
+merge 1:1 date using "${path}/data/tmp/Data_RGDP_pr.dta", nogenerate
 
 *drop if date < tq(1967q1)
 drop ROUTPUT65Q4-ROUTPUT66Q4
@@ -77,4 +72,4 @@ foreach var of varlist Y* {
 drop Y* RGDP* t*
 keep if tin(1967q1,2012q4)
 
-save "${path}/stata/data/tmp/Data_Output_gap_dt_pr.dta",replace
+save "${path}/data/tmp/Data_Output_gap_dt_pr.dta",replace

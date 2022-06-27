@@ -10,12 +10,7 @@ macro drop _all
 program drop _all
 
 * Defining a global for current path
-if c(username) == "Narek" {
-	global path "E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation"
-}
-if c(username) == "apple" {
-	global path "/Users/apple/Dropbox/Discretion_vs_Committment/RECENT VERSION"
-}
+global path "INSERT-PATH-HERE"
 
 cd "${path}"
 
@@ -24,9 +19,9 @@ tempfile part1 part2
 * ================================ Import RGDP data =============================
 
 * Merge two parts
-import excel "${path}/stata/data/in/gRGDP_1967_1984.xlsx", sheet("gRGDP_1967_1984") firstrow clear
+import excel "${path}/data/in/gRGDP_1967_1984.xlsx", sheet("gRGDP_1967_1984") firstrow clear
 save `part1'
-import excel "${path}/stata/data/in/gRGDP_1985_Last.xlsx", sheet("gRGDP_1985_Last") firstrow clear
+import excel "${path}/data/in/gRGDP_1985_Last.xlsx", sheet("gRGDP_1985_Last") firstrow clear
 save `part2'
 use `part1'
 merge 1:1 Date using `part2', nogenerate
@@ -88,4 +83,4 @@ foreach a in "t_4" "t_3" "t_2" "t_1" "t" "t1" "t2" "t3" "t4" {
 * Dropping the raw data
 drop q*
 
-save "${path}/stata/data/tmp/Data_RGDP_pr.dta",replace
+save "${path}/data/tmp/Data_RGDP_pr.dta",replace

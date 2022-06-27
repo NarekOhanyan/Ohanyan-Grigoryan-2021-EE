@@ -10,18 +10,13 @@ macro drop _all
 program drop _all
 
 * Defining a global for current path
-if c(username) == "Narek" {
-	global path "E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation"
-}
-if c(username) == "apple" {
-	global path "/Users/apple/Dropbox/Discretion_vs_Committment/RECENT VERSION"
-}
+global path "INSERT-PATH-HERE"
 
 cd "${path}"
 
 * ============================= Import GDP gap data ============================
 
-import excel "${path}/stata/data/in/Greenbook_Output_Gap_Web.xlsx", sheet("Output Gap") cellrange(A3:U207) clear
+import excel "${path}/data/in/Greenbook_Output_Gap_Web.xlsx", sheet("Output Gap") cellrange(A3:U207) clear
 
 drop A B
 replace C = "Date" in 1
@@ -45,4 +40,4 @@ collapse (mean) t*, by(date)
 rename t* Output_gap_t*
 tsset date, quarterly
 
-save "${path}/stata/data/tmp/Data_Output_gap_pr.dta",replace
+save "${path}/data/tmp/Data_Output_gap_pr.dta",replace
