@@ -43,7 +43,7 @@ if c(username) == "apple" {
 
 * Save logs
 capture log close
-log using "${path}/stata/log/do_model_rolling `c(current_date)'.smcl", replace
+log using "${path}/stata/log/model_rolling `c(current_date)'.smcl", replace
 
 * Defining a global for Greenspan's period
 global Greenspan "date>=tq(1987q3) & date<=tq(2005q4)"

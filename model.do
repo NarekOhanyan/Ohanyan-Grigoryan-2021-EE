@@ -49,7 +49,7 @@ if c(username) == "apple" {
 
 * Save logs
 capture log close
-log using "${path}/stata/log/do_model `c(current_date)'.smcl", replace
+log using "${path}/stata/log/model `c(current_date)'.smcl", replace
 
 * Defining a global for whole sample
 global Full_Sample "date>=tq(1967q1) & date<=tq(2005q4)"

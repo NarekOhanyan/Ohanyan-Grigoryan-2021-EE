@@ -36,23 +36,23 @@ if c(username) == "apple" {
 
 * Save logs
 capture log close
-log using "${path}/stata/log/do_data `c(current_date)'.smcl", replace
+log using "${path}/stata/log/data `c(current_date)'.smcl", replace
 
 cd "${path}"
 
 * ==============================================================================
 
-do "${path}/stata/data/do/do_fed_funds_rate.do"
-do "${path}/stata/data/do/do_vix_vxo.do"
-do "${path}/stata/data/do/do_pgdp.do"
-do "${path}/stata/data/do/do_pcpi.do"
-do "${path}/stata/data/do/do_pcpix.do"
-do "${path}/stata/data/do/do_rgdp.do"
-do "${path}/stata/data/do/do_output_gap_dt.do"
-do "${path}/stata/data/do/do_output_gap.do"
-do "${path}/stata/data/do/do_unrate.do"
-do "${path}/stata/data/do/do_reer.do"
-do "${path}/stata/data/do/do_gs1_gs5_gs10.do"
+do "${path}/stata/data/do/fed_funds_rate.do"
+do "${path}/stata/data/do/vix_vxo.do"
+do "${path}/stata/data/do/pgdp.do"
+do "${path}/stata/data/do/pcpi.do"
+do "${path}/stata/data/do/pcpix.do"
+do "${path}/stata/data/do/rgdp.do"
+do "${path}/stata/data/do/output_gap_dt.do"
+do "${path}/stata/data/do/output_gap.do"
+do "${path}/stata/data/do/unrate.do"
+do "${path}/stata/data/do/reer.do"
+do "${path}/stata/data/do/gs1_gs5_gs10.do"
 
 * =============================== Merge the data ===============================
 
