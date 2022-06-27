@@ -1,0 +1,189 @@
+{smcl}
+{txt}{sf}{ul off}{.-}
+      name:  {res}<unnamed>
+       {txt}log:  {res}E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/log/do_intro  8 May 2020.smcl
+  {txt}log type:  {res}smcl
+ {txt}opened on:  {res} 8 May 2020, 19:41:02
+{txt}
+{com}. 
+. * Defining a global for whole sample
+. global Full_Sample "date>=tq(1967q1) & date<=tq(2005q4)"
+{txt}
+{com}. 
+. * Defining a global for pre-Volcker period
+. global Pre_Volcker "date>=tq(1967q1) & date<=tq(1979q2)"
+{txt}
+{com}. 
+. * Defining a global for Volcker period
+. global Volcker "date>=tq(1979q3) & date<=tq(1987q2)"
+{txt}
+{com}. 
+. * Defining a global for Greenspan's period
+. global Greenspan "date>=tq(1987q3) & date<=tq(2005q4)"
+{txt}
+{com}. 
+. * Defining a variance estimation method
+. global vce vce(robust)
+{txt}
+{com}. 
+. cd "${c -(}path{c )-}"
+{res}E:\Drive\my drive\private\research\rules-vs-discretion\files\estimation
+{txt}
+{com}. 
+. * ==============================================================================
+. 
+. use "${c -(}path{c )-}/stata/data/out/Data.dta",clear
+{txt}
+{com}. 
+. * Replacing missing VIX with VXO (uses old methodology)
+. replace VIX = VXO if missing(VIX)
+{txt}(16 real changes made)
+
+{com}. 
+. label var FF_A             "Fed funds rate"
+{txt}
+{com}. label var PGDP_t           "GDP deflator"
+{txt}
+{com}. label var PCPI_t           "Headline Inflation"
+{txt}
+{com}. label var PCPIX_t          "Core inflation"
+{txt}
+{com}. label var Output_gap_t     "Output gap"
+{txt}
+{com}. label var Output_gap_dt_t0 "Output gap (detrended)"
+{txt}
+{com}. label var VIX              "VIX volatility index"
+{txt}
+{com}. 
+. keep if ${c -(}Full_Sample{c )-}
+{txt}(133 observations deleted)
+
+{com}. 
+. * ==============================================================================
+. 
+. foreach var in FF_A PGDP_t1 PCPI_t1 PCPIX_t1 Output_gap_dt_t1 Output_gap_t1 VIX {c -(}
+{txt}  2{com}.         local ytitle
+{txt}  3{com}.         local yscalerange
+{txt}  4{com}.         if inlist("`var'","FF_A","Output_gap_dt_t1") {c -(}
+{txt}  5{com}.                 local ytitle "%"
+{txt}  6{com}.         {c )-}
+{txt}  7{com}.         if inlist("`var'","PGDP_t1","PCPI_t1","PCPIX_t1") {c -(}
+{txt}  8{com}.                 local yscalerange range(0 15)
+{txt}  9{com}.         {c )-}
+{txt} 10{com}.         twoway (tsline `var' if ${c -(}Full_Sample{c )-}, lcolor(navy) lwidth(thick) yline(0)), yscale(titlegap(3) `yscalerange') ttitle("") tlabel(1970q1(40)2000q4, labsize(huge) format(%tqCY)) tmtick(##5) ytitle("`ytitle'", size(huge) orientation(horizontal)) ylabel(#5, labsize(huge) angle(horizontal) format(%4.0f)) scheme(s1mono) name(graph_`var',replace)
+{txt} 11{com}.         graph export "${c -(}path{c )-}/stata/figure/graph_`var'.pdf", as(pdf) replace
+{txt} 12{com}.         graph export "${c -(}path{c )-}/stata/figure/graph_`var'.eps", as(eps) replace
+{txt} 13{com}. {c )-}
+{res}{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/graph_FF_A.pdf written in PDF format)
+(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/graph_FF_A.eps written in EPS format)
+{res}{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/graph_PGDP_t1.pdf written in PDF format)
+(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/graph_PGDP_t1.eps written in EPS format)
+{res}{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/graph_PCPI_t1.pdf written in PDF format)
+(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/graph_PCPI_t1.eps written in EPS format)
+{res}{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/graph_PCPIX_t1.pdf written in PDF format)
+(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/graph_PCPIX_t1.eps written in EPS format)
+{res}{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/graph_Output_gap_dt_t1.pdf written in PDF format)
+(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/graph_Output_gap_dt_t1.eps written in EPS format)
+{res}{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/graph_Output_gap_t1.pdf written in PDF format)
+(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/graph_Output_gap_t1.eps written in EPS format)
+{res}{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/graph_VIX.pdf written in PDF format)
+(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/graph_VIX.eps written in EPS format)
+
+{com}. 
+. * ============================ Summary Statistics ==============================
+. 
+. estpost sum FF_A PGDP_t1 PCPI_t1 PCPIX_t1 Output_gap_dt_t1 Output_gap_t1 VIX if ${c -(}Full_Sample{c )-}
+
+{txt}{space 0}{space 0}{ralign 12:}{space 1}{c |}{space 1}{ralign 9:e(count)}{space 1}{space 1}{ralign 9:e(sum_w)}{space 1}{space 1}{ralign 9:e(mean)}{space 1}{space 1}{ralign 9:e(Var)}{space 1}{space 1}{ralign 9:e(sd)}{space 1}{space 1}{ralign 9:e(min)}{space 1}{space 1}{ralign 9:e(max)}{space 1}{space 1}{ralign 9:e(sum)}{space 1}
+{space 0}{hline 13}{c   +}{hline 11}{hline 11}{hline 11}{hline 11}{hline 11}{hline 11}{hline 11}{hline 11}
+{space 0}{space 0}{ralign 12:FF_A}{space 1}{c |}{space 1}{ralign 9:{res:{sf:      156}}}{space 1}{space 1}{ralign 9:{res:{sf:      156}}}{space 1}{space 1}{ralign 9:{res:{sf:  6.60765}}}{space 1}{space 1}{ralign 9:{res:{sf: 11.27605}}}{space 1}{space 1}{ralign 9:{res:{sf: 3.357983}}}{space 1}{space 1}{ralign 9:{res:{sf: .9966667}}}{space 1}{space 1}{ralign 9:{res:{sf:    17.78}}}{space 1}{space 1}{ralign 9:{res:{sf: 1030.793}}}{space 1}
+{space 0}{space 0}{ralign 12:PGDP_t1}{space 1}{c |}{space 1}{ralign 9:{res:{sf:      156}}}{space 1}{space 1}{ralign 9:{res:{sf:      156}}}{space 1}{space 1}{ralign 9:{res:{sf:   3.9375}}}{space 1}{space 1}{ralign 9:{res:{sf: 5.146827}}}{space 1}{space 1}{ralign 9:{res:{sf: 2.268662}}}{space 1}{space 1}{ralign 9:{res:{sf:      .75}}}{space 1}{space 1}{ralign 9:{res:{sf:    10.97}}}{space 1}{space 1}{ralign 9:{res:{sf:   614.25}}}{space 1}
+{space 0}{space 0}{ralign 12:PCPI_t1}{space 1}{c |}{space 1}{ralign 9:{res:{sf:      105}}}{space 1}{space 1}{ralign 9:{res:{sf:      105}}}{space 1}{space 1}{ralign 9:{res:{sf: 3.953524}}}{space 1}{space 1}{ralign 9:{res:{sf: 7.806271}}}{space 1}{space 1}{ralign 9:{res:{sf:  2.79397}}}{space 1}{space 1}{ralign 9:{res:{sf:      .85}}}{space 1}{space 1}{ralign 9:{res:{sf:     15.6}}}{space 1}{space 1}{ralign 9:{res:{sf:   415.12}}}{space 1}
+{space 0}{space 0}{ralign 12:PCPIX_t1}{space 1}{c |}{space 1}{ralign 9:{res:{sf:       80}}}{space 1}{space 1}{ralign 9:{res:{sf:       80}}}{space 1}{space 1}{ralign 9:{res:{sf: 3.139625}}}{space 1}{space 1}{ralign 9:{res:{sf: 1.053459}}}{space 1}{space 1}{ralign 9:{res:{sf: 1.026382}}}{space 1}{space 1}{ralign 9:{res:{sf:      1.3}}}{space 1}{space 1}{ralign 9:{res:{sf:      5.6}}}{space 1}{space 1}{ralign 9:{res:{sf:   251.17}}}{space 1}
+{space 0}{space 0}{ralign 12:Output_~t_t1}{space 1}{c |}{space 1}{ralign 9:{res:{sf:      156}}}{space 1}{space 1}{ralign 9:{res:{sf:      156}}}{space 1}{space 1}{ralign 9:{res:{sf: 3.422405}}}{space 1}{space 1}{ralign 9:{res:{sf:  38.7407}}}{space 1}{space 1}{ralign 9:{res:{sf: 6.224203}}}{space 1}{space 1}{ralign 9:{res:{sf:-16.87898}}}{space 1}{space 1}{ralign 9:{res:{sf: 16.12024}}}{space 1}{space 1}{ralign 9:{res:{sf: 533.8952}}}{space 1}
+{space 0}{space 0}{ralign 12:Output_~p_t1}{space 1}{c |}{space 1}{ralign 9:{res:{sf:       74}}}{space 1}{space 1}{ralign 9:{res:{sf:       74}}}{space 1}{space 1}{ralign 9:{res:{sf:-.4343919}}}{space 1}{space 1}{ralign 9:{res:{sf: 3.471274}}}{space 1}{space 1}{ralign 9:{res:{sf: 1.863136}}}{space 1}{space 1}{ralign 9:{res:{sf:     -4.7}}}{space 1}{space 1}{ralign 9:{res:{sf:        3}}}{space 1}{space 1}{ralign 9:{res:{sf:  -32.145}}}{space 1}
+{space 0}{space 0}{ralign 12:VIX}{space 1}{c |}{space 1}{ralign 9:{res:{sf:       80}}}{space 1}{space 1}{ralign 9:{res:{sf:       80}}}{space 1}{space 1}{ralign 9:{res:{sf: 20.23875}}}{space 1}{space 1}{ralign 9:{res:{sf: 41.72323}}}{space 1}{space 1}{ralign 9:{res:{sf: 6.459352}}}{space 1}{space 1}{ralign 9:{res:{sf: 11.99238}}}{space 1}{space 1}{ralign 9:{res:{sf: 49.81828}}}{space 1}{space 1}{ralign 9:{res:{sf:   1619.1}}}{space 1}
+
+{com}. est store sum_stat
+{txt}
+{com}. esttab sum_stat using "${c -(}path{c )-}/stata/tex/sumstat.tex", replace ///
+> mtitles("") ///
+> refcat(headroom "\textbf{c -(}\emph{c -(}Group 1{c )-}{c )-}" price "\textbf{c -(}\emph{c -(}Group 2{c )-}{c )-}", nolabel) ///
+> collabels(\multicolumn{c -(}1{c )-}{c -(}c{c )-}{c -(}{c -(}Mean{c )-}{c )-} \multicolumn{c -(}1{c )-}{c -(}c{c )-}{c -(}{c -(}Std.Dev.{c )-}{c )-} \multicolumn{c -(}1{c )-}{c -(}l{c )-}{c -(}{c -(}Obs{c )-}{c )-}) ///
+> cells("mean(fmt(2)) sd(fmt(2)) count(fmt(0))") label nonumber f noobs alignment(S) booktabs
+{res}{txt}(output written to {browse  `"E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/tex/sumstat.tex"'})
+
+{com}. 
+. * ========================= Mean and Variance test =============================
+. 
+. * T-test for equality of means for inflation measures
+. ttest PCPI_t1 == PCPIX_t1 if ~missing(PCPI_t1) & ~missing(PCPIX_t1)
+
+{txt}Paired t test
+{hline 9}{c TT}{hline 68}
+Variable{col 10}{c |}{col 16}Obs{col 27}Mean{col 35}Std. Err.{col 47}Std. Dev.{col 59}[95% Conf. Interval]
+{hline 9}{c +}{hline 68}
+ PCPI_t1 {c |}{res}{col 12}     80{col 22}  2.91225{col 34} .1242588{col 46} 1.111405{col 58} 2.664919{col 70} 3.159581
+{txt}PCPIX_t1 {c |}{res}{col 12}     80{col 22} 3.139625{col 34}  .114753{col 46} 1.026382{col 58} 2.911215{col 70} 3.368035
+{txt}{hline 9}{c +}{hline 68}
+    diff {c |}{res}{col 12}     80{col 22} -.227375{col 34} .0750782{col 46} .6715196{col 58}-.3768144{col 70}-.0779356
+{txt}{hline 9}{c BT}{hline 68}
+     mean(diff) = mean({res}PCPI_t1{txt} - {res}PCPIX_t1{txt})                        t = {res} -3.0285
+{txt} Ho: mean(diff) = 0                              degrees of freedom = {res}      79
+
+ {txt}Ha: mean(diff) < 0           Ha: mean(diff) != 0           Ha: mean(diff) > 0
+ Pr(T < t) = {res}0.0017         {txt}Pr(|T| > |t|) = {res}0.0033          {txt}Pr(T > t) = {res}0.9983
+{txt}
+{com}. 
+. * F-test for equality of variances for inflation measures
+. sdtest PCPI_t1 == PCPIX_t1 if ~missing(PCPI_t1) & ~missing(PCPIX_t1)
+
+{txt}Variance ratio test
+{hline 9}{c TT}{hline 68}
+Variable{col 10}{c |}{col 16}Obs{col 27}Mean{col 35}Std. Err.{col 47}Std. Dev.{col 59}[95% Conf. Interval]
+{hline 9}{c +}{hline 68}
+ PCPI_t1 {c |}{res}{col 12}     80{col 22}  2.91225{col 34} .1242588{col 46} 1.111405{col 58} 2.664919{col 70} 3.159581
+{txt}PCPIX_t1 {c |}{res}{col 12}     80{col 22} 3.139625{col 34}  .114753{col 46} 1.026382{col 58} 2.911215{col 70} 3.368035
+{txt}{hline 9}{c +}{hline 68}
+combined {c |}{res}{col 12}    160{col 22} 3.025937{col 34} .0847846{col 46}  1.07245{col 58} 2.858488{col 70} 3.193387
+{txt}{hline 9}{c BT}{hline 68}
+    ratio = sd({res}PCPI_t1{txt}) / sd({res}PCPIX_t1{txt})                            f = {res}  1.1725
+{txt}Ho: ratio = 1                                    degrees of freedom =   {res}79, 79
+
+    {txt}Ha: ratio < 1               Ha: ratio != 1                 Ha: ratio > 1
+  Pr(F < f) = {res}0.7595         {txt}2*Pr(F > f) = {res}0.4810        {txt}   Pr(F > f) = {res}0.2405
+{txt}
+{com}. 
+. * Correlation between inflation measures
+. correlate PGDP_t1 PCPI_t1 PCPIX_t1
+{txt}(obs=80)
+
+             {c |}  PGDP_t1  PCPI_t1 PCPIX_t1
+{hline 13}{c +}{hline 27}
+     PGDP_t1 {c |}{res}   1.0000
+     {txt}PCPI_t1 {c |}{res}   0.7958   1.0000
+    {txt}PCPIX_t1 {c |}{res}   0.8914   0.8055   1.0000
+
+{txt}
+{com}. 
+. * Correlation between output measures
+. correlate Output_gap_dt_t1 Output_gap_t1
+{txt}(obs=74)
+
+             {c |} Out~t_t1 Out~p_t1
+{hline 13}{c +}{hline 18}
+Output_~t_t1 {c |}{res}   1.0000
+{txt}Output_~p_t1 {c |}{res}   0.4285   1.0000
+
+{txt}
+{com}. 
+. * ==============================================================================
+. 
+. log close
+      {txt}name:  {res}<unnamed>
+       {txt}log:  {res}E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/log/do_intro  8 May 2020.smcl
+  {txt}log type:  {res}smcl
+ {txt}closed on:  {res} 8 May 2020, 19:41:43
+{txt}{.-}
+{smcl}
+{txt}{sf}{ul off}

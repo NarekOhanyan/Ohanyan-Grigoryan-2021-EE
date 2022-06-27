@@ -1,0 +1,1490 @@
+{smcl}
+{com}{sf}{ul off}{txt}{.-}
+      name:  {res}<unnamed>
+       {txt}log:  {res}E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/log/do_model  8 May 2020.smcl
+  {txt}log type:  {res}smcl
+ {txt}opened on:  {res} 8 May 2020, 20:40:40
+{txt}
+{com}. 
+. * Defining a global for whole sample
+. global Full_Sample "date>=tq(1967q1) & date<=tq(2005q4)"
+{txt}
+{com}. 
+. * Defining a global for pre-Volcker period
+. global Pre_Volcker "date>=tq(1967q1) & date<=tq(1979q2)"
+{txt}
+{com}. 
+. * Defining a global for Volcker period
+. global Volcker "date>=tq(1979q3) & date<=tq(1987q2)"
+{txt}
+{com}. 
+. * Defining a global for Greenspan's period
+. global Greenspan "date>=tq(1987q3) & date<=tq(2005q4)"
+{txt}
+{com}. 
+. * Defining a variance estimation method
+. global vce vce(robust)
+{txt}
+{com}. 
+. cd "${c -(}path{c )-}"
+{res}E:\Drive\my drive\private\research\rules-vs-discretion\files\estimation
+{txt}
+{com}. 
+. * ==============================================================================
+. 
+. use "${c -(}path{c )-}/stata/data/out/Data.dta",clear
+{txt}
+{com}. 
+. * Replacing missing VIX with VXO (uses old methodology)
+. replace VIX = VXO if missing(VIX)
+{txt}(16 real changes made)
+
+{com}. 
+. do "${c -(}path{c )-}/stata/do/garch_diag.do"
+{txt}
+{com}. * ============================= GARCH diagnostics ============================== 
+. 
+. capture program drop garch_diag
+{txt}
+{com}. 
+. program garch_diag
+{txt}  1{com}. 
+. *   graph drop _all
+.    capture drop h* res*
+{txt}  2{com}.    qui predict res, residuals
+{txt}  3{com}.    qui predict h  , variance
+{txt}  4{com}.    qui gen     res_s  = res/sqrt(h)
+{txt}  5{com}.    qui gen     res2   = res^2
+{txt}  6{com}.    qui gen     res_s2 = res_s^2
+{txt}  7{com}.    di as input "" _newline "Test for residuals"
+{txt}  8{com}.    wntestq res, lags(4)
+{txt}  9{com}.    wntestq res, lags(8)
+{txt} 10{com}. *   wntestq res, lags(12)
+.    di as input "" _newline "Test for standardized residuals"
+{txt} 11{com}.    wntestq res_s, lags(4)
+{txt} 12{com}.    wntestq res_s, lags(8)
+{txt} 13{com}. *   wntestq res, lags(12)
+.    di as input "" _newline "Test for squared residuals"
+{txt} 14{com}.    wntestq res2, lags(4)
+{txt} 15{com}.    wntestq res2, lags(8)
+{txt} 16{com}. *   wntestq res, lags(12)
+.    di as input "" _newline "Test for squared standardized residuals"
+{txt} 17{com}.    wntestq res_s2, lags(4)
+{txt} 18{com}.    wntestq res_s2, lags(8)
+{txt} 19{com}. *   wntestq res, lags(12)
+. 
+. *   ac      res2, name(AC,replace)
+. *   pac     res2, name(PAC,replace)
+. *   ac      res_s2, name(Standardized_AC,replace)
+. *   pac     res_s2, name(Standardized_PAC,replace)
+.    capture drop h* res*
+{txt} 20{com}. 
+. end
+{txt}
+{com}. 
+{txt}end of do-file
+
+{com}. do "${c -(}path{c )-}/stata/do/coef_ident.do"
+{txt}
+{com}. * ======================= identification of coefficients ======================= 
+. 
+. capture program drop coef_ident_1 coef_ident_1_sq
+{txt}
+{com}. capture program drop coef_ident_2 coef_ident_2_1 coef_ident_2_2 coef_ident_2_dolado coef_ident_2_as coef_ident_2_sq
+{txt}
+{com}. 
+. program coef_ident_1
+{txt}  1{com}.         scalar rho = _b[L1.FF_A]+_b[L2.FF_A]
+{txt}  2{com}.         scalar phi_pi = _b[PGDP_t1]/(1-_b[L1.FF_A]-_b[L2.FF_A])
+{txt}  3{com}.         scalar phi_x = _b[Output_gap_dt_t1]/(1-_b[L1.FF_A]-_b[L2.FF_A])
+{txt}  4{com}.         di as input "" _newline "Mean equation"
+{txt}  5{com}.         di as text "Fed funds rate"
+{txt}  6{com}.         di as text round(rho,0.001)
+{txt}  7{com}.         di as text "Inflation"
+{txt}  8{com}.         di as text round(phi_pi,0.001)
+{txt}  9{com}.         di as text "Output gap"
+{txt} 10{com}.         di as text round(phi_x,0.001)
+{txt} 11{com}. end
+{txt}
+{com}. 
+. program coef_ident_2
+{txt}  1{com}.         scalar rho = _b[L1.FF_A]+_b[L2.FF_A]
+{txt}  2{com}.         scalar phi_pi = _b[PCPIX_t1]/(1-_b[L1.FF_A]-_b[L2.FF_A])
+{txt}  3{com}.         scalar phi_x = _b[Output_gap_t1]/(1-_b[L1.FF_A]-_b[L2.FF_A])
+{txt}  4{com}.         di as input "" _newline "Mean equation:"
+{txt}  5{com}.         di as text "Fed funds rate"
+{txt}  6{com}.         di as text round(rho,0.001)
+{txt}  7{com}.         di as text "Inflation"
+{txt}  8{com}.         di as text round(phi_pi,0.001)
+{txt}  9{com}.         di as text "Output gap"
+{txt} 10{com}.         di as text round(phi_x,0.001)
+{txt} 11{com}. end
+{txt}
+{com}. 
+. program coef_ident_2_1
+{txt}  1{com}.         scalar rho = _b[L1.FF_A]+_b[L2.FF_A]
+{txt}  2{com}.         scalar phi_pi = _b[PCPI_t1]/(1-_b[L1.FF_A]-_b[L2.FF_A])
+{txt}  3{com}.         scalar phi_x = _b[Output_gap_t1]/(1-_b[L1.FF_A]-_b[L2.FF_A])
+{txt}  4{com}.         di as input "" _newline "Mean equation:"
+{txt}  5{com}.         di as text "Fed funds rate"
+{txt}  6{com}.         di as text round(rho,0.001)
+{txt}  7{com}.         di as text "Inflation"
+{txt}  8{com}.         di as text round(phi_pi,0.001)
+{txt}  9{com}.         di as text "Output gap"
+{txt} 10{com}.         di as text round(phi_x,0.001)
+{txt} 11{com}. end
+{txt}
+{com}. 
+. program coef_ident_2_2
+{txt}  1{com}.         scalar rho = _b[L1.FF_A]+_b[L2.FF_A]
+{txt}  2{com}.         scalar phi_pi = _b[PCPI_t1]/(1-_b[L1.FF_A]-_b[L2.FF_A])
+{txt}  3{com}.         scalar phi_pix = _b[PCPIX_t1]/(1-_b[L1.FF_A]-_b[L2.FF_A])
+{txt}  4{com}.         scalar phi_x = _b[Output_gap_t1]/(1-_b[L1.FF_A]-_b[L2.FF_A])
+{txt}  5{com}.         di as input "" _newline "Mean equation:"
+{txt}  6{com}.         di as text "Fed funds rate"
+{txt}  7{com}.         di as text round(rho,0.001)
+{txt}  8{com}.         di as text "Headline Inflation"
+{txt}  9{com}.         di as text round(phi_pi,0.001)
+{txt} 10{com}.         di as text "Core Inflation"
+{txt} 11{com}.         di as text round(phi_pix,0.001)
+{txt} 12{com}.         di as text "Output gap"
+{txt} 13{com}.         di as text round(phi_x,0.001)
+{txt} 14{com}. end
+{txt}
+{com}. 
+. program coef_ident_2_as
+{txt}  1{com}.         scalar rho = _b[L1.FF_A]+_b[L2.FF_A]
+{txt}  2{com}.         scalar phi_pi_p = _b[PCPIX_t1_p]/(1-_b[L1.FF_A]-_b[L2.FF_A])
+{txt}  3{com}.         scalar phi_pi_n = _b[PCPIX_t1_n]/(1-_b[L1.FF_A]-_b[L2.FF_A])
+{txt}  4{com}.         scalar phi_x_p = _b[Output_gap_t1_p]/(1-_b[L1.FF_A]-_b[L2.FF_A])
+{txt}  5{com}.         scalar phi_x_n = _b[Output_gap_t1_n]/(1-_b[L1.FF_A]-_b[L2.FF_A])
+{txt}  6{com}.         di as input "" _newline "Mean equation:"
+{txt}  7{com}.         di as text "Fed funds rate"
+{txt}  8{com}.         di as text round(rho,0.001)
+{txt}  9{com}.         di as text "Inflation >2%"
+{txt} 10{com}.         di as text round(phi_pi_p,0.001)
+{txt} 11{com}.         di as text "Inflation <2%"
+{txt} 12{com}.         di as text round(phi_pi_n,0.001)
+{txt} 13{com}.         di as text "Output gap +"
+{txt} 14{com}.         di as text round(phi_x_p,0.001)
+{txt} 15{com}.         di as text "Output gap -"
+{txt} 16{com}.         di as text round(phi_x_n,0.001)
+{txt} 17{com}. end
+{txt}
+{com}. 
+. program coef_ident_2_dolado
+{txt}  1{com}.         scalar rho = _b[L1.FF_A]+_b[L2.FF_A]
+{txt}  2{com}.         scalar phi_pi = _b[PCPIX_t1]/(1-_b[L1.FF_A]-_b[L2.FF_A])
+{txt}  3{com}.         scalar phi_x = _b[Output_gap_t1]/(1-_b[L1.FF_A]-_b[L2.FF_A])
+{txt}  4{com}.         scalar phi_s2 = _b[Sigma2_PCPIX_t1]/(1-_b[L1.FF_A]-_b[L2.FF_A])
+{txt}  5{com}.         di as input "" _newline "Mean equation:"
+{txt}  6{com}.         di as text "Fed funds rate"
+{txt}  7{com}.         di as text round(rho,0.001)
+{txt}  8{com}.         di as text "Inflation"
+{txt}  9{com}.         di as text round(phi_pi,0.001)
+{txt} 10{com}.         di as text "Output gap"
+{txt} 11{com}.         di as text round(phi_x,0.001)
+{txt} 12{com}.         di as text "Variance of inflation"
+{txt} 13{com}.         di as text round(phi_s2,0.001)
+{txt} 14{com}. end
+{txt}
+{com}. 
+. program coef_ident_1_sq
+{txt}  1{com}.         scalar rho = _b[L1.FF_A]+_b[L2.FF_A]
+{txt}  2{com}.         scalar phi_pi = _b[PGDP_t1]/(1-_b[L1.FF_A]-_b[L2.FF_A])
+{txt}  3{com}.         scalar phi_pi2 = _b[PGDP2_t1]/(1-_b[L1.FF_A]-_b[L2.FF_A])
+{txt}  4{com}.         scalar phi_x = _b[Output_gap_dt_t1]/(1-_b[L1.FF_A]-_b[L2.FF_A])
+{txt}  5{com}.         scalar phi_x2 = _b[Output_gap_dt2_t1]/(1-_b[L1.FF_A]-_b[L2.FF_A])
+{txt}  6{com}.         di as input "" _newline "Mean equation:"
+{txt}  7{com}.         di as text "Fed funds rate"
+{txt}  8{com}.         di as text round(rho,0.001)
+{txt}  9{com}.         di as text "Inflation"
+{txt} 10{com}.         di as text round(phi_pi,0.001)
+{txt} 11{com}.         di as text "Inflation sq"
+{txt} 12{com}.         di as text round(phi_pi2,0.001)
+{txt} 13{com}.         di as text "Output gap"
+{txt} 14{com}.         di as text round(phi_x,0.001)
+{txt} 15{com}.         di as text "Output gap sq"
+{txt} 16{com}.         di as text round(phi_x2,0.001)
+{txt} 17{com}. end
+{txt}
+{com}. 
+. program coef_ident_2_sq
+{txt}  1{com}.         scalar rho = _b[L1.FF_A]+_b[L2.FF_A]
+{txt}  2{com}.         scalar phi_pi = _b[PCPIX_t1]/(1-_b[L1.FF_A]-_b[L2.FF_A])
+{txt}  3{com}.         scalar phi_pi2 = _b[PCPIX2_t1]/(1-_b[L1.FF_A]-_b[L2.FF_A])
+{txt}  4{com}.         scalar phi_x = _b[Output_gap_t1]/(1-_b[L1.FF_A]-_b[L2.FF_A])
+{txt}  5{com}.         scalar phi_x2 = _b[Output_gap2_t1]/(1-_b[L1.FF_A]-_b[L2.FF_A])
+{txt}  6{com}.         di as text "Fed funds rate"
+{txt}  7{com}.         di as text round(rho,0.001)
+{txt}  8{com}.         di as text "Inflation"
+{txt}  9{com}.         di as text round(phi_pi,0.001)
+{txt} 10{com}.         di as text "Inflation sq"
+{txt} 11{com}.         di as text round(phi_pi2,0.001)
+{txt} 12{com}.         di as text "Output gap"
+{txt} 13{com}.         di as text round(phi_x,0.001)
+{txt} 14{com}.         di as text "Output gap sq"
+{txt} 15{com}.         di as text round(phi_x2,0.001)
+{txt} 16{com}. end
+{txt}
+{com}. 
+{txt}end of do-file
+
+{com}. 
+. * ================================= Full Sample ================================
+. 
+. * Baseline model
+. qui arch FF_A l(1/2).FF_A PGDP_t1 Output_gap_dt_t1 if ${c -(}Full_Sample{c )-}, ${c -(}vce{c )-}
+{txt}
+{com}. est store Full_Sample_baseline
+{txt}
+{com}. coef_ident_1
+
+Mean equation
+{txt}Fed funds rate
+.877
+Inflation
+1.726
+Output gap
+.387
+
+{com}. 
+. * Extended model
+. qui arch FF_A l(1/2).FF_A PGDP_t1 Output_gap_dt_t1 if ${c -(}Full_Sample{c )-}, arch(1) garch(1) ${c -(}vce{c )-} 
+{txt}
+{com}. est store Full_Sample_garch
+{txt}
+{com}. coef_ident_1
+
+Mean equation
+{txt}Fed funds rate
+.915
+Inflation
+2.241
+Output gap
+.544
+
+{com}. 
+. * Extended model
+. qui arch FF_A l(1/2).FF_A PGDP_t1 Output_gap_dt_t1 if ${c -(}Full_Sample{c )-}, het(PGDP_t1 Output_gap_dt_t1) ${c -(}vce{c )-} 
+{txt}
+{com}. est store Full_Sample_het
+{txt}
+{com}. coef_ident_1
+
+Mean equation
+{txt}Fed funds rate
+.927
+Inflation
+1.578
+Output gap
+.595
+
+{com}. 
+. * Extended model
+. qui arch FF_A l(1/2).FF_A PGDP_t1 Output_gap_dt_t1 if ${c -(}Full_Sample{c )-}, arch(1) garch(1) het(PGDP_t1 Output_gap_dt_t1) ${c -(}vce{c )-} 
+{txt}
+{com}. est store Full_Sample_garch_het
+{txt}
+{com}. coef_ident_1
+
+Mean equation
+{txt}Fed funds rate
+.923
+Inflation
+1.614
+Output gap
+.553
+
+{com}. 
+. * Table 2: The estimation results of the model for the whole sample
+. est table Full_Sample_baseline Full_Sample_garch Full_Sample_het Full_Sample_garch_het, stat(N aic bic) star(0.1 0.05 0.01) b(%5.3f)
+{res}
+{txt}{hline 12}{c -}{c TT}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{ralign 12:Variable} {c |} {center 10:Full_Sam~e} {space 1} {center 10:Full_Sam~h} {space 1} {center 10:Full_Sam~t} {space 1} {center 10:Full_Sam~t} {space 1}
+{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}FF_A         {txt}{c |}{res}
+{txt}{space 8}FF_A {c |}
+{space 9}L1. {c |}{res} {ralign 7:1.046}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.330}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.313}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.346}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 9}L2. {c |}{res} {ralign 7:-0.169}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.415}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-0.386}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-0.424}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 5}PGDP_t1 {c |}{res} {ralign 7:0.213}{lalign 3:**}{txt} {space 1}{res} {ralign 7:0.191}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.115}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.125}{lalign 3:***}{txt} {space 1}
+{res}{txt}Output_~t_t1 {c |}{res} {ralign 7:0.048}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.046}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.043}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.043}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 7}_cons {c |}{res} {ralign 7:-0.193}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.252}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-0.135}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.134}{lalign 3:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}SIGMA2       {txt}{c |}{res}
+{txt}{space 7}_cons {c |}{res} {ralign 7:0.858}{lalign 3:***}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}ARCH         {txt}{c |}{res}
+{txt}{space 8}arch {c |}
+{space 9}L1. {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.324}{lalign 3:***}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.163}{lalign 3:}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 7}garch {c |}
+{space 9}L1. {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.737}{lalign 3:***}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.365}{lalign 3:**}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 7}_cons {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.000}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}HET          {txt}{c |}{res}
+{txt}{space 5}PGDP_t1 {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.624}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.639}{lalign 3:***}{txt} {space 1}
+{res}{txt}Output_~t_t1 {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.010}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.006}{lalign 3:}{txt} {space 1}
+{res}{txt}{space 7}_cons {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-3.584}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-4.527}{lalign 3:***}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{lalign 12:Statistics}{txt} {c |} {center 10:} {space 1} {center 10:} {space 1} {center 10:} {space 1} {center 10:} {space 1}
+{res}{txt}{ralign 12:N} {c |}{res} {ralign 7:156}{lalign 3:}{txt} {space 1}{res} {ralign 7:156}{lalign 3:}{txt} {space 1}{res} {ralign 7:156}{lalign 3:}{txt} {space 1}{res} {ralign 7:156}{lalign 3:}{txt} {space 1}
+{res}{txt}{ralign 12:aic} {c |}{res} {ralign 7:430.800}{lalign 3:}{txt} {space 1}{res} {ralign 7:294.164}{lalign 3:}{txt} {space 1}{res} {ralign 7:277.724}{lalign 3:}{txt} {space 1}{res} {ralign 7:273.606}{lalign 3:}{txt} {space 1}
+{res}{txt}{ralign 12:bic} {c |}{res} {ralign 7:449.099}{lalign 3:}{txt} {space 1}{res} {ralign 7:318.563}{lalign 3:}{txt} {space 1}{res} {ralign 7:302.123}{lalign 3:}{txt} {space 1}{res} {ralign 7:304.104}{lalign 3:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c BT}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{ralign 66:legend: * p<.1; ** p<.05; *** p<.01}
+{res}{txt}
+{com}. 
+. * ================================= Sub-Samples ================================
+. 
+. * Baseline model
+. qui arch FF_A l(1/2).FF_A PGDP_t1 Output_gap_dt_t1 if ${c -(}Pre_Volcker{c )-}, ${c -(}vce{c )-}
+{txt}
+{com}. est store Pre_Volcker_baseline
+{txt}
+{com}. coef_ident_1
+
+Mean equation
+{txt}Fed funds rate
+.796
+Inflation
+.741
+Output gap
+.098
+
+{com}. 
+. * Extended model
+. qui arch FF_A l(1/2).FF_A PGDP_t1 Output_gap_dt_t1 if ${c -(}Pre_Volcker{c )-}, het(PGDP_t1 Output_gap_dt_t1) ${c -(}vce{c )-} 
+{txt}
+{com}. est store Pre_Volcker_het
+{txt}
+{com}. coef_ident_1
+
+Mean equation
+{txt}Fed funds rate
+.766
+Inflation
+.907
+Output gap
+.01
+
+{com}. 
+. * ----------------------------------- Volcker ----------------------------------
+. 
+. * Baseline model
+. qui arch FF_A l(1/2).FF_A PGDP_t1 Output_gap_dt_t1 if ${c -(}Volcker{c )-}, ${c -(}vce{c )-}
+{txt}
+{com}. est store Volcker_baseline
+{txt}
+{com}. coef_ident_1
+
+Mean equation
+{txt}Fed funds rate
+.729
+Inflation
+2.77
+Output gap
+.672
+
+{com}. 
+. * Extended model
+. qui arch FF_A l(1/2).FF_A PGDP_t1 Output_gap_dt_t1 if ${c -(}Volcker{c )-}, het(PGDP_t1 Output_gap_dt_t1) ${c -(}vce{c )-} 
+{txt}
+{com}. est store Volcker_het
+{txt}
+{com}. coef_ident_1
+
+Mean equation
+{txt}Fed funds rate
+.625
+Inflation
+1.963
+Output gap
+.307
+
+{com}. 
+. * ---------------------------------- Greenspan ---------------------------------
+. 
+. * Baseline model
+. qui arch FF_A l(1/2).FF_A PGDP_t1 Output_gap_dt_t1 if ${c -(}Greenspan{c )-}, ${c -(}vce{c )-}
+{txt}
+{com}. est store Greenspan_baseline
+{txt}
+{com}. coef_ident_1
+
+Mean equation
+{txt}Fed funds rate
+.954
+Inflation
+3.351
+Output gap
+1.34
+
+{com}. 
+. * Extended model
+. qui arch FF_A l(1/2).FF_A PGDP_t1 Output_gap_dt_t1 if ${c -(}Greenspan{c )-}, het(PGDP_t1 Output_gap_dt_t1) ${c -(}vce{c )-} 
+{txt}
+{com}. est store Greenspan_het
+{txt}
+{com}. coef_ident_1
+
+Mean equation
+{txt}Fed funds rate
+.956
+Inflation
+3.045
+Output gap
+1.194
+
+{com}. 
+. * Table 3: The estimation results of the model for the subsamples
+. est table Pre_Volcker* Volcker* Greenspan*, stat(N aic bic) star(0.1 0.05 0.01) b(%5.3f)
+{res}
+{txt}{hline 12}{c -}{c TT}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{ralign 12:Variable} {c |} {center 10:Pre_Volc~e} {space 1} {center 10:Pre_Volc~t} {space 1} {center 10:Volcker_~e} {space 1} {center 10:Volcker_~t} {space 1} {center 10:Greenspa~e} {space 1} {center 10:Greenspa~t} {space 1}
+{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}FF_A         {txt}{c |}{res}
+{txt}{space 8}FF_A {c |}
+{space 9}L1. {c |}{res} {ralign 7:1.259}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.296}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.669}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.613}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.320}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.383}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 9}L2. {c |}{res} {ralign 7:-0.463}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-0.530}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.060}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.012}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.366}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-0.427}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 5}PGDP_t1 {c |}{res} {ralign 7:0.151}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.212}{lalign 3:**}{txt} {space 1}{res} {ralign 7:0.750}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.736}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.154}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.133}{lalign 3:**}{txt} {space 1}
+{res}{txt}Output_~t_t1 {c |}{res} {ralign 7:0.020}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.002}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.182}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.115}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.062}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.052}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 7}_cons {c |}{res} {ralign 7:0.515}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.489}{lalign 3:}{txt} {space 1}{res} {ralign 7:-1.719}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.339}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.378}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-0.301}{lalign 3:**}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}SIGMA2       {txt}{c |}{res}
+{txt}{space 7}_cons {c |}{res} {ralign 7:0.749}{lalign 3:***}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:1.787}{lalign 3:***}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.068}{lalign 3:***}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}HET          {txt}{c |}{res}
+{txt}{space 5}PGDP_t1 {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.314}{lalign 3:*}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.558}{lalign 3:***}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.168}{lalign 3:}{txt} {space 1}
+{res}{txt}Output_~t_t1 {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.009}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.001}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.077}{lalign 3:**}{txt} {space 1}
+{res}{txt}{space 7}_cons {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-1.998}{lalign 3:**}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-3.411}{lalign 3:**}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-2.910}{lalign 3:***}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{lalign 12:Statistics}{txt} {c |} {center 10:} {space 1} {center 10:} {space 1} {center 10:} {space 1} {center 10:} {space 1} {center 10:} {space 1} {center 10:} {space 1}
+{res}{txt}{ralign 12:N} {c |}{res} {ralign 7:50}{lalign 3:}{txt} {space 1}{res} {ralign 7:50}{lalign 3:}{txt} {space 1}{res} {ralign 7:32}{lalign 3:}{txt} {space 1}{res} {ralign 7:32}{lalign 3:}{txt} {space 1}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}
+{res}{txt}{ralign 12:aic} {c |}{res} {ralign 7:139.425}{lalign 3:}{txt} {space 1}{res} {ralign 7:136.835}{lalign 3:}{txt} {space 1}{res} {ralign 7:121.382}{lalign 3:}{txt} {space 1}{res} {ralign 7:97.050}{lalign 3:}{txt} {space 1}{res} {ralign 7:22.877}{lalign 3:}{txt} {space 1}{res} {ralign 7:21.448}{lalign 3:}{txt} {space 1}
+{res}{txt}{ralign 12:bic} {c |}{res} {ralign 7:150.897}{lalign 3:}{txt} {space 1}{res} {ralign 7:152.131}{lalign 3:}{txt} {space 1}{res} {ralign 7:130.177}{lalign 3:}{txt} {space 1}{res} {ralign 7:108.776}{lalign 3:}{txt} {space 1}{res} {ralign 7:36.701}{lalign 3:}{txt} {space 1}{res} {ralign 7:39.880}{lalign 3:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c BT}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{ralign 92:legend: * p<.1; ** p<.05; *** p<.01}
+{res}{txt}
+{com}. 
+. * ================================== Greenspan =================================
+. 
+. * Baseline model
+. qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 if ${c -(}Greenspan{c )-}, ${c -(}vce{c )-}
+{txt}
+{com}. est store baseline
+{txt}
+{com}. coef_ident_2
+
+Mean equation:
+{txt}Fed funds rate
+.761
+Inflation
+1.765
+Output gap
+.789
+
+{com}. 
+. * Extended model
+. qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 if ${c -(}Greenspan{c )-}, het(PCPIX_t1 Output_gap_t1) ${c -(}vce{c )-} 
+{txt}
+{com}. est store extended
+{txt}
+{com}. coef_ident_2
+
+Mean equation:
+{txt}Fed funds rate
+.77
+Inflation
+1.774
+Output gap
+.788
+
+{com}. 
+. * Table 4: The estimation results of the model for Alan Greenspan's era
+. est table baseline extended, stat(N aic bic) star(0.1 0.05 0.01) b(%5.3f)
+{res}
+{txt}{hline 12}{c -}{c TT}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{ralign 12:Variable} {c |} {center 10:baseline} {space 1} {center 10:extended} {space 1}
+{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}FF_A         {txt}{c |}{res}
+{txt}{space 8}FF_A {c |}
+{space 9}L1. {c |}{res} {ralign 7:1.189}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.247}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 9}L2. {c |}{res} {ralign 7:-0.428}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-0.477}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 4}PCPIX_t1 {c |}{res} {ralign 7:0.422}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.408}{lalign 3:***}{txt} {space 1}
+{res}{txt}Output_~p_t1 {c |}{res} {ralign 7:0.189}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.181}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 7}_cons {c |}{res} {ralign 7:-0.070}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.072}{lalign 3:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}SIGMA2       {txt}{c |}{res}
+{txt}{space 7}_cons {c |}{res} {ralign 7:0.057}{lalign 3:***}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}HET          {txt}{c |}{res}
+{txt}{space 4}PCPIX_t1 {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.341}{lalign 3:**}{txt} {space 1}
+{res}{txt}Output_~p_t1 {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.057}{lalign 3:}{txt} {space 1}
+{res}{txt}{space 7}_cons {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-3.997}{lalign 3:***}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{lalign 12:Statistics}{txt} {c |} {center 10:} {space 1} {center 10:} {space 1}
+{res}{txt}{ralign 12:N} {c |}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}
+{res}{txt}{ralign 12:aic} {c |}{res} {ralign 7:9.970}{lalign 3:}{txt} {space 1}{res} {ralign 7:9.342}{lalign 3:}{txt} {space 1}
+{res}{txt}{ralign 12:bic} {c |}{res} {ralign 7:23.794}{lalign 3:}{txt} {space 1}{res} {ralign 7:27.775}{lalign 3:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c BT}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{ralign 40:legend: * p<.1; ** p<.05; *** p<.01}
+{res}{txt}
+{com}. 
+. * ------------------- Determinants of Greenspan's discretion -------------------
+. 
+. * Baseline model
+. qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 if ${c -(}Greenspan{c )-}, ${c -(}vce{c )-}
+{txt}
+{com}. est store baseline
+{txt}
+{com}. coef_ident_2
+
+Mean equation:
+{txt}Fed funds rate
+.761
+Inflation
+1.765
+Output gap
+.789
+
+{com}. 
+. * Extended-1 model
+. qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 if ${c -(}Greenspan{c )-}, het(PCPI_t1 PCPIX_t1 Output_gap_t1) ${c -(}vce{c )-} 
+{txt}
+{com}. est store extended_1
+{txt}
+{com}. coef_ident_2
+
+Mean equation:
+{txt}Fed funds rate
+.789
+Inflation
+1.808
+Output gap
+.777
+
+{com}. 
+. * Extended-2 model
+. qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 if ${c -(}Greenspan{c )-}, het(PCPI_t1 PCPIX_t1 Output_gap_t1 L.VIX) ${c -(}vce{c )-} 
+{txt}
+{com}. est store extended_2
+{txt}
+{com}. coef_ident_2
+
+Mean equation:
+{txt}Fed funds rate
+.8
+Inflation
+1.765
+Output gap
+.771
+
+{com}. 
+. * Table 5: The estimation results of the model with additional variance regressors for Alan Greenspan's era
+. est table baseline extended_1 extended_2, stat(N aic bic) star(0.1 0.05 0.01) b(%5.3f)
+{res}
+{txt}{hline 12}{c -}{c TT}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{ralign 12:Variable} {c |} {center 10:baseline} {space 1} {center 10:extended_1} {space 1} {center 10:extended_2} {space 1}
+{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}FF_A         {txt}{c |}{res}
+{txt}{space 8}FF_A {c |}
+{space 9}L1. {c |}{res} {ralign 7:1.189}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.246}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.283}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 9}L2. {c |}{res} {ralign 7:-0.428}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-0.457}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-0.483}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 4}PCPIX_t1 {c |}{res} {ralign 7:0.422}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.381}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.354}{lalign 3:***}{txt} {space 1}
+{res}{txt}Output_~p_t1 {c |}{res} {ralign 7:0.189}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.164}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.154}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 7}_cons {c |}{res} {ralign 7:-0.070}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.049}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.014}{lalign 3:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}SIGMA2       {txt}{c |}{res}
+{txt}{space 7}_cons {c |}{res} {ralign 7:0.057}{lalign 3:***}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}HET          {txt}{c |}{res}
+{txt}{space 5}PCPI_t1 {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-1.257}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-0.834}{lalign 3:**}{txt} {space 1}
+{res}{txt}{space 4}PCPIX_t1 {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:1.627}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.223}{lalign 3:***}{txt} {space 1}
+{res}{txt}Output_~p_t1 {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.046}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.129}{lalign 3:}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 9}VIX {c |}
+{space 9}L1. {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.073}{lalign 3:**}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 7}_cons {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-4.409}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-5.997}{lalign 3:***}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{lalign 12:Statistics}{txt} {c |} {center 10:} {space 1} {center 10:} {space 1} {center 10:} {space 1}
+{res}{txt}{ralign 12:N} {c |}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}
+{res}{txt}{ralign 12:aic} {c |}{res} {ralign 7:9.970}{lalign 3:}{txt} {space 1}{res} {ralign 7:2.838}{lalign 3:}{txt} {space 1}{res} {ralign 7:-1.599}{lalign 3:}{txt} {space 1}
+{res}{txt}{ralign 12:bic} {c |}{res} {ralign 7:23.794}{lalign 3:}{txt} {space 1}{res} {ralign 7:23.575}{lalign 3:}{txt} {space 1}{res} {ralign 7:21.442}{lalign 3:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c BT}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{ralign 53:legend: * p<.1; ** p<.05; *** p<.01}
+{res}{txt}
+{com}. 
+. * --------------------------- Asymmetric discretion ----------------------------
+. 
+. gen dd_PCPIX_t1      = (PCPIX_t1     >=2)
+{txt}
+{com}. gen dd_PCPI_t1       = (PCPI_t1      >=2)
+{txt}
+{com}. gen dd_Output_gap_t1 = (Output_gap_t1>=0)
+{txt}
+{com}. 
+. gen PCPIX_t1_p       = PCPIX_t1     *   dd_PCPIX_t1
+{txt}(181 missing values generated)
+
+{com}. gen PCPIX_t1_n       = PCPIX_t1     *(1-dd_PCPIX_t1)
+{txt}(181 missing values generated)
+
+{com}. gen PCPI_t1_p        = PCPI_t1      *   dd_PCPI_t1
+{txt}(156 missing values generated)
+
+{com}. gen PCPI_t1_n        = PCPI_t1      *(1-dd_PCPI_t1)
+{txt}(156 missing values generated)
+
+{com}. gen Output_gap_t1_p  = Output_gap_t1*   dd_Output_gap_t1
+{txt}(187 missing values generated)
+
+{com}. gen Output_gap_t1_n  = Output_gap_t1*(1-dd_Output_gap_t1)
+{txt}(187 missing values generated)
+
+{com}. 
+. * Extended model
+. qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 if ${c -(}Greenspan{c )-}, het(PCPI_t1 PCPIX_t1 Output_gap_t1 L.VIX) ${c -(}vce{c )-}
+{txt}
+{com}. est store extended_2
+{txt}
+{com}. coef_ident_2
+
+Mean equation:
+{txt}Fed funds rate
+.8
+Inflation
+1.765
+Output gap
+.771
+
+{com}. 
+. * Extended model asymmetric
+. qui arch FF_A l(1/2).FF_A PCPIX_t1_p PCPIX_t1_n Output_gap_t1_p Output_gap_t1_n if ${c -(}Greenspan{c )-}, het(PCPI_t1_p PCPI_t1_n PCPIX_t1_p PCPIX_t1_n Output_gap_t1_p Output_gap_t1_n L.VIX) ${c -(}vce{c )-}
+{txt}
+{com}. est store extended_2_1_as
+{txt}
+{com}. coef_ident_2_as
+
+Mean equation:
+{txt}Fed funds rate
+.793
+Inflation >2%
+1.707
+Inflation <2%
+1.43
+Output gap +
+.744
+Output gap -
+.756
+
+{com}. 
+. test [FF_A]:PCPIX_t1_p      == [FF_A]:PCPIX_t1_n
+
+{p 0 7}{space 1}{text:( 1)}{space 1} {res}[FF_A]PCPIX_t1_p - [FF_A]PCPIX_t1_n = 0{p_end}
+
+{txt}{col 12}chi2(  1) ={res}    0.97
+{txt}{col 10}Prob > chi2 =  {res}  0.3246
+{txt}
+{com}. test [FF_A]:Output_gap_t1_p == [FF_A]:Output_gap_t1_n
+
+{p 0 7}{space 1}{text:( 1)}{space 1} {res}[FF_A]Output_gap_t1_p - [FF_A]Output_gap_t1_n = 0{p_end}
+
+{txt}{col 12}chi2(  1) ={res}    0.00
+{txt}{col 10}Prob > chi2 =  {res}  0.9584
+{txt}
+{com}. test [HET]:PCPI_t1_p        == [HET]:PCPI_t1_n
+
+{p 0 7}{space 1}{text:( 1)}{space 1} {res}[HET]PCPI_t1_p - [HET]PCPI_t1_n = 0{p_end}
+
+{txt}{col 12}chi2(  1) ={res}    0.00
+{txt}{col 10}Prob > chi2 =  {res}  0.9689
+{txt}
+{com}. test [HET]:PCPIX_t1_p       == [HET]:PCPIX_t1_n
+
+{p 0 7}{space 1}{text:( 1)}{space 1} {res}[HET]PCPIX_t1_p - [HET]PCPIX_t1_n = 0{p_end}
+
+{txt}{col 12}chi2(  1) ={res}    0.57
+{txt}{col 10}Prob > chi2 =  {res}  0.4503
+{txt}
+{com}. test [HET]:Output_gap_t1_p  == [HET]:Output_gap_t1_n
+
+{p 0 7}{space 1}{text:( 1)}{space 1} {res}[HET]Output_gap_t1_p - [HET]Output_gap_t1_n = 0{p_end}
+
+{txt}{col 12}chi2(  1) ={res}    2.04
+{txt}{col 10}Prob > chi2 =  {res}  0.1528
+{txt}
+{com}. 
+. * Table 6: The estimation results of the models with headline and core inflation in the mean equation
+. est table extended_2 extended_2_1_as, stat(N aic bic) star(0.1 0.05 0.01) b(%5.3f)
+{res}
+{txt}{hline 12}{c -}{c TT}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{ralign 12:Variable} {c |} {center 10:extended_2} {space 1} {center 10:extended~s} {space 1}
+{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}FF_A         {txt}{c |}{res}
+{txt}{space 8}FF_A {c |}
+{space 9}L1. {c |}{res} {ralign 7:1.283}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.270}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 9}L2. {c |}{res} {ralign 7:-0.483}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-0.477}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 4}PCPIX_t1 {c |}{res} {ralign 7:0.354}{lalign 3:***}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}
+{res}{txt}Output_~p_t1 {c |}{res} {ralign 7:0.154}{lalign 3:***}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}
+{res}{txt}{space 2}PCPIX_t1_p {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.354}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 2}PCPIX_t1_n {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.296}{lalign 3:***}{txt} {space 1}
+{res}{txt}Output_gap~p {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.154}{lalign 3:***}{txt} {space 1}
+{res}{txt}Output_gap~n {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.157}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 7}_cons {c |}{res} {ralign 7:-0.014}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.025}{lalign 3:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}HET          {txt}{c |}{res}
+{txt}{space 5}PCPI_t1 {c |}{res} {ralign 7:-0.834}{lalign 3:**}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}
+{res}{txt}{space 4}PCPIX_t1 {c |}{res} {ralign 7:1.223}{lalign 3:***}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}
+{res}{txt}Output_~p_t1 {c |}{res} {ralign 7:-0.129}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 9}VIX {c |}
+{space 9}L1. {c |}{res} {ralign 7:0.073}{lalign 3:**}{txt} {space 1}{res} {ralign 7:0.056}{lalign 3:*}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 3}PCPI_t1_p {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-1.015}{lalign 3:**}{txt} {space 1}
+{res}{txt}{space 3}PCPI_t1_n {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.994}{lalign 3:}{txt} {space 1}
+{res}{txt}{space 2}PCPIX_t1_p {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:1.399}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 2}PCPIX_t1_n {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:1.168}{lalign 3:**}{txt} {space 1}
+{res}{txt}Output_gap~p {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.150}{lalign 3:}{txt} {space 1}
+{res}{txt}Output_gap~n {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.286}{lalign 3:**}{txt} {space 1}
+{res}{txt}{space 7}_cons {c |}{res} {ralign 7:-5.997}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-5.986}{lalign 3:***}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{lalign 12:Statistics}{txt} {c |} {center 10:} {space 1} {center 10:} {space 1}
+{res}{txt}{ralign 12:N} {c |}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}
+{res}{txt}{ralign 12:aic} {c |}{res} {ralign 7:-1.599}{lalign 3:}{txt} {space 1}{res} {ralign 7:5.639}{lalign 3:}{txt} {space 1}
+{res}{txt}{ralign 12:bic} {c |}{res} {ralign 7:21.442}{lalign 3:}{txt} {space 1}{res} {ralign 7:40.200}{lalign 3:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c BT}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{ralign 40:legend: * p<.1; ** p<.05; *** p<.01}
+{res}{txt}
+{com}. 
+. * ============================ Degree of Discretion ============================
+. 
+. * --------------------------------- Full Sample --------------------------------
+. 
+. gen res = .
+{txt}(289 missing values generated)
+
+{com}. gen sqrt_h = .
+{txt}(289 missing values generated)
+
+{com}. label var res "Residuals of the policy rule"
+{txt}
+{com}. label var sqrt_h "Conditional standard deviation"
+{txt}
+{com}. 
+. qui arch FF_A l(1/2).FF_A PGDP_t1 Output_gap_dt_t1 if ${c -(}Full_Sample{c )-}, het(PGDP_t1 Output_gap_dt_t1) arch(1) garch(1) ${c -(}vce{c )-} 
+{txt}
+{com}. predict eps,res
+{txt}(105 missing values generated)
+
+{com}. predict h, var
+{txt}(105 missing values generated)
+
+{com}. replace res = eps if ${c -(}Full_Sample{c )-}
+{txt}(156 real changes made)
+
+{com}. replace sqrt_h = sqrt(h) if ${c -(}Full_Sample{c )-}
+{txt}(156 real changes made)
+
+{com}. drop eps h
+{txt}
+{com}. 
+. twoway (tsline res, lcolor(navy) lwidth(medthick)) (tsline sqrt_h, lcolor(maroon) lwidth(thick)) if ${c -(}Full_Sample{c )-}, yline(0) yscale(range(-4 8)) ylabel(-4(2)8, angle(horizontal)) ttitle("") tlabel(, format(%tqCY)) tmtick(##5) title("") scheme(s1mono) name(volatility_fullsample,replace) // Volatility of policy shocks
+{res}{txt}
+{com}. graph export "${c -(}path{c )-}/stata/figure/volatility_fullsample.eps", as(eps) preview(on) replace
+{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/volatility_fullsample.eps written in EPS format)
+
+{com}. graph export "${c -(}path{c )-}/stata/figure/volatility_fullsample.pdf", as(pdf) replace
+{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/volatility_fullsample.pdf written in PDF format)
+
+{com}. 
+. drop res sqrt_h
+{txt}
+{com}. 
+. * --------------------------------- Sub-Samples --------------------------------
+. /*
+> gen res = .
+> gen sqrt_h = .
+> label var res "Residuals of the policy rule"
+> label var sqrt_h "Conditional standard deviation"
+> 
+> foreach subsample in Pre_Volcker Volcker Greenspan {c -(}
+>         qui arch FF_A l(1/2).FF_A PGDP_t1 Output_gap_dt_t1 if ${c -(}`subsample'{c )-}, het(PGDP_t1 Output_gap_dt_t1) ${c -(}vce{c )-} 
+>         predict eps,res
+>         predict h, var
+>         replace res = eps if ${c -(}`subsample'{c )-}
+>         replace sqrt_h = sqrt(h) if ${c -(}`subsample'{c )-}
+>         drop eps h
+> {c )-}
+> 
+> *twoway (tsline sqrt_eps2) (tsline sqrt_h, lwidth(medthick)) if ${c -(}Full_Sample{c )-}, tline(1979q3 1987q3, lcolor(black) lpattern(dot)) ttitle("") tlabel(, format(%tqCY)) title("Volatility of policy shocks") note(Note: Vertical lines represent Volcker's and Greenspan's appointment as the Fed Chairman, span margin(medium)) name(volatility_subsamples,replace)
+> twoway (tsline res, lcolor(navy) lwidth(medthick)) (tsline sqrt_h, lcolor(maroon) lwidth(thick)) if ${c -(}Full_Sample{c )-}, tline(1979q3 1987q3, lcolor(black) lpattern(dot)) yline(0) yscale(range(-6 4)) ylabel(-6(2)4, angle(horizontal)) ttitle("") tlabel(, format(%tqCY)) tmtick(##5) title("") scheme(s1mono) name(volatility_subsamples1,replace) // Volatility of policy shocks
+> graph export "${c -(}path{c )-}/stata/figure/volatility_subsamples.eps", as(eps) preview(on) replace
+> graph export "${c -(}path{c )-}/stata/figure/volatility_subsamples.pdf", as(pdf) replace
+> 
+> drop res sqrt_h
+> */
+. * ---------------------------------- Greenspan ---------------------------------
+. 
+. gen res = .
+{txt}(289 missing values generated)
+
+{com}. gen sqrt_h = .
+{txt}(289 missing values generated)
+
+{com}. label var res "Residuals of the policy rule"
+{txt}
+{com}. label var sqrt_h "Conditional standard deviation"
+{txt}
+{com}. 
+. qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 if ${c -(}Greenspan{c )-}, het(PCPI_t1 PCPIX_t1 Output_gap_t1 L.VIX) ${c -(}vce{c )-} 
+{txt}
+{com}. 
+. predict eps,res
+{txt}(187 missing values generated)
+
+{com}. label var eps "Residuals"
+{txt}
+{com}. predict h, var
+{txt}(187 missing values generated)
+
+{com}. replace res = eps
+{txt}(102 real changes made)
+
+{com}. replace sqrt_h = sqrt(h)
+{txt}(102 real changes made)
+
+{com}. 
+. twoway (tsline res, lcolor(navy) lwidth(medthick)) (tsline sqrt_h, lcolor(maroon) lwidth(thick)) if ${c -(}Greenspan{c )-}, yline(0) ylabel(,angle(horizontal)) ttitle("") tlabel(, format(%tqCY)) tmtick(##5) title("") scheme(s1mono) name(volatility_greenspan,replace) // Volatility of policy shocks
+{res}{txt}
+{com}. graph export "${c -(}path{c )-}/stata/figure/volatility_greenspan.eps", as(eps) preview(on) replace
+{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/volatility_greenspan.eps written in EPS format)
+
+{com}. graph export "${c -(}path{c )-}/stata/figure/volatility_greenspan.pdf", as(pdf) replace
+{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/volatility_greenspan.pdf written in PDF format)
+
+{com}. 
+. drop eps res h sqrt_h
+{txt}
+{com}. 
+. * ---------------------------------- Greenspan ---------------------------------
+. /*
+> qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 if ${c -(}Greenspan{c )-}, het(PCPI_t1 PCPIX_t1 Output_gap_t1 L.VIX) ${c -(}vce{c )-} 
+> 
+> predict eps,res
+> 
+> gen rb = _b[L1.FF_A]*d.l1.FF_A + _b[L2.FF_A]*d.l2.FF_A + _b[PCPIX_t1]*d.PCPIX_t1 + _b[Output_gap_t1]*d.Output_gap_t1
+> gen db = d.eps
+> *gen df = d.FF_A
+> gen df = rb+db
+> 
+> corr rb db
+> qui sum rb
+> scalar Var_rb = r(Var)
+> qui sum db
+> scalar Var_db = r(Var)
+> 
+> di "The contribution of rule-based component = " 100*Var_rb/(Var_rb+Var_db)
+> di "The contribution of discretionary component = " 100*Var_db/(Var_rb+Var_db)
+> 
+> label var df "Change of the Fed funds rate"
+> label var rb "Rule-based"
+> label var db "Discretionary"
+> 
+> *twoway (bar rb date if ${c -(}Greenspan{c )-}) (bar db date if ${c -(}Greenspan{c )-}) (line df date if ${c -(}Greenspan{c )-}, lcolor(black) lwidth(medthick)), ttitle("") tlabel(, format(%tqCY)) ytitle("%") name(g1,replace)
+> twoway (bar df date if ${c -(}Greenspan{c )-} & ((rb < 0 & db < 0) | (rb > 0 & db > 0)), lcolor(sand) fcolor(sand)) (bar rb date if ${c -(}Greenspan{c )-}, lcolor(maroon) fcolor(maroon)) (bar db date if ${c -(}Greenspan{c )-} & ((rb > 0 & db < 0) | (rb < 0 & db > 0)), lcolor(sand) fcolor(sand)) (line df date if ${c -(}Greenspan{c )-}, lcolor(black) lwidth(medthick)), yscale(titlegap(3)) ttitle("") tlabel(, format(%tqCY)) tmtick(##5) ytitle("%", orientation(horizontal)) yline(0) legend(order(2 "Rule-based" 3 "Discretionary" 4 "Change of the Fed funds rate")) scheme(s1mono) name(ffr_rb_db_decomposition,replace)
+> graph export "${c -(}path{c )-}/stata/figure/ffr_rb_db_decomposition.pdf", as(pdf) replace
+> */
+. * ============================== Robustness checks =============================
+. 
+. * Extended-1 model with CPIX in mean equation (for robustness)
+. qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 if ${c -(}Greenspan{c )-}, het(PCPI_t1 PCPIX_t1 Output_gap_t1 L.VIX) ${c -(}vce{c )-} 
+{txt}
+{com}. est store extended_2_PCPIX_t1
+{txt}
+{com}. coef_ident_2
+
+Mean equation:
+{txt}Fed funds rate
+.8
+Inflation
+1.765
+Output gap
+.771
+
+{com}. 
+. * Extended-2 model with CPI in mean equation (for robustness)
+. qui arch FF_A l(1/2).FF_A PCPI_t1 Output_gap_t1 if ${c -(}Greenspan{c )-}, het(PCPI_t1 PCPIX_t1 Output_gap_t1 L.VIX) ${c -(}vce{c )-} 
+{txt}
+{com}. est store extended_2_PCPI_t1
+{txt}
+{com}. coef_ident_2_1
+
+Mean equation:
+{txt}Fed funds rate
+.868
+Inflation
+1.326
+Output gap
+.796
+
+{com}. 
+. * Extended-2 model with CPI and CPIX in mean equation (for robustness)
+. qui arch FF_A l(1/2).FF_A PCPI_t1 PCPIX_t1 Output_gap_t1 if ${c -(}Greenspan{c )-}, het(PCPI_t1 PCPIX_t1 Output_gap_t1 L.VIX) ${c -(}vce{c )-} 
+{txt}
+{com}. est store extended_2_PCPI_t1_PCPIX_t1
+{txt}
+{com}. coef_ident_2_2
+
+Mean equation:
+{txt}Fed funds rate
+.81
+Headline Inflation
+.397
+Core Inflation
+1.345
+Output gap
+.776
+
+{com}. 
+. * Table 7: The estimation results of the symmetric and asymmetric models for Alan Greenspan's era
+. est table extended_2_PCPIX_t1 extended_2_PCPI_t1 extended_2_PCPI_t1_PCPIX_t1, stat(N ll aic bic) star(0.1 0.05 0.01) b(%5.3f)
+{res}
+{txt}{hline 12}{c -}{c TT}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{ralign 12:Variable} {c |} {center 10:extended~1} {space 1} {center 10:extended~1} {space 1} {center 10:extended~1} {space 1}
+{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}FF_A         {txt}{c |}{res}
+{txt}{space 8}FF_A {c |}
+{space 9}L1. {c |}{res} {ralign 7:1.283}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.396}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.292}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 9}L2. {c |}{res} {ralign 7:-0.483}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-0.528}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-0.482}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 4}PCPIX_t1 {c |}{res} {ralign 7:0.354}{lalign 3:***}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.255}{lalign 3:***}{txt} {space 1}
+{res}{txt}Output_~p_t1 {c |}{res} {ralign 7:0.154}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.105}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.147}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 5}PCPI_t1 {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.175}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.075}{lalign 3:**}{txt} {space 1}
+{res}{txt}{space 7}_cons {c |}{res} {ralign 7:-0.014}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.149}{lalign 3:*}{txt} {space 1}{res} {ralign 7:-0.009}{lalign 3:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}HET          {txt}{c |}{res}
+{txt}{space 5}PCPI_t1 {c |}{res} {ralign 7:-0.834}{lalign 3:**}{txt} {space 1}{res} {ralign 7:-0.722}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.796}{lalign 3:**}{txt} {space 1}
+{res}{txt}{space 4}PCPIX_t1 {c |}{res} {ralign 7:1.223}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.220}{lalign 3:**}{txt} {space 1}{res} {ralign 7:1.213}{lalign 3:***}{txt} {space 1}
+{res}{txt}Output_~p_t1 {c |}{res} {ralign 7:-0.129}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.117}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.116}{lalign 3:}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 9}VIX {c |}
+{space 9}L1. {c |}{res} {ralign 7:0.073}{lalign 3:**}{txt} {space 1}{res} {ralign 7:0.055}{lalign 3:*}{txt} {space 1}{res} {ralign 7:0.068}{lalign 3:**}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 7}_cons {c |}{res} {ralign 7:-5.997}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-5.852}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-6.019}{lalign 3:***}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{lalign 12:Statistics}{txt} {c |} {center 10:} {space 1} {center 10:} {space 1} {center 10:} {space 1}
+{res}{txt}{ralign 12:N} {c |}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}
+{res}{txt}{ralign 12:ll} {c |}{res} {ralign 7:10.800}{lalign 3:}{txt} {space 1}{res} {ralign 7:7.103}{lalign 3:}{txt} {space 1}{res} {ralign 7:12.761}{lalign 3:}{txt} {space 1}
+{res}{txt}{ralign 12:aic} {c |}{res} {ralign 7:-1.599}{lalign 3:}{txt} {space 1}{res} {ralign 7:5.794}{lalign 3:}{txt} {space 1}{res} {ralign 7:-3.521}{lalign 3:}{txt} {space 1}
+{res}{txt}{ralign 12:bic} {c |}{res} {ralign 7:21.442}{lalign 3:}{txt} {space 1}{res} {ralign 7:28.835}{lalign 3:}{txt} {space 1}{res} {ralign 7:21.823}{lalign 3:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c BT}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{ralign 53:legend: * p<.1; ** p<.05; *** p<.01}
+{res}{txt}
+{com}. 
+. * --------------------------------- Asymmetric ---------------------------------
+. 
+. * Generating squares of PCPIX and Output_gap
+. gen PCPI2_t1 = PCPI_t1^2
+{txt}(156 missing values generated)
+
+{com}. gen PCPI2_t2 = PCPI_t2^2
+{txt}(156 missing values generated)
+
+{com}. gen PCPIX2_t1 = PCPIX_t1^2
+{txt}(181 missing values generated)
+
+{com}. gen PCPIX2_t2 = PCPIX_t2^2
+{txt}(181 missing values generated)
+
+{com}. gen Output_gap2_t = Output_gap_t^2
+{txt}(187 missing values generated)
+
+{com}. gen Output_gap2_t1 = Output_gap_t1^2
+{txt}(187 missing values generated)
+
+{com}. 
+. * Baseline model
+. qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 if $Greenspan, $vce
+{txt}
+{com}. est store baseline
+{txt}
+{com}. coef_ident_2
+
+Mean equation:
+{txt}Fed funds rate
+.761
+Inflation
+1.765
+Output gap
+.789
+
+{com}. qui arch FF_A l(1/2).FF_A PCPIX_t1 PCPIX2_t1 Output_gap_t1 Output_gap2_t1 if $Greenspan, $vce
+{txt}
+{com}. est store baseline_nl
+{txt}
+{com}. coef_ident_2_sq
+{txt}Fed funds rate
+.755
+Inflation
+2.35
+Inflation sq
+-.085
+Output gap
+.795
+Output gap sq
+.009
+
+{com}. 
+. * Extended model
+. qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 if $Greenspan, het(PCPIX_t1 Output_gap_t1) $vce 
+{txt}
+{com}. est store extended
+{txt}
+{com}. coef_ident_2
+
+Mean equation:
+{txt}Fed funds rate
+.77
+Inflation
+1.774
+Output gap
+.788
+
+{com}. qui arch FF_A l(1/2).FF_A PCPIX_t1 PCPIX2_t1 Output_gap_t1 Output_gap2_t1 if $Greenspan, het(PCPIX_t1 Output_gap_t1) $vce 
+{txt}
+{com}. est store extended_nl
+{txt}
+{com}. coef_ident_2_sq
+{txt}Fed funds rate
+.767
+Inflation
+2.015
+Inflation sq
+-.037
+Output gap
+.791
+Output gap sq
+.014
+
+{com}. 
+. * Extended-2 model
+. qui qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 if $Greenspan, het(PCPI_t1 PCPIX_t1 Output_gap_t1 L.VIX) $vce 
+{txt}
+{com}. est store extended_2
+{txt}
+{com}. coef_ident_2
+
+Mean equation:
+{txt}Fed funds rate
+.8
+Inflation
+1.765
+Output gap
+.771
+
+{com}. qui qui arch FF_A l(1/2).FF_A PCPIX_t1 PCPIX2_t1 Output_gap_t1 Output_gap2_t1 if $Greenspan, het(PCPI_t1 PCPIX_t1 Output_gap_t1  L.VIX) $vce 
+{txt}
+{com}. est store extended_2_nl
+{txt}
+{com}. coef_ident_2_sq
+{txt}Fed funds rate
+.799
+Inflation
+1.97
+Inflation sq
+-.032
+Output gap
+.773
+Output gap sq
+.007
+
+{com}. 
+. * Table 8: The estimation results of nonlinear specifications
+. est table baseline baseline_nl extended extended_nl extended_2 extended_2_nl, stat(N aic bic) star(0.1 0.05 0.01) b(%5.3f)
+{res}
+{txt}{hline 12}{c -}{c TT}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{ralign 12:Variable} {c |} {center 10:baseline} {space 1} {center 10:baseline~l} {space 1} {center 10:extended} {space 1} {center 10:extended~l} {space 1} {center 10:extended_2} {space 1} {center 10:extended~l} {space 1}
+{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}FF_A         {txt}{c |}{res}
+{txt}{space 8}FF_A {c |}
+{space 9}L1. {c |}{res} {ralign 7:1.189}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.188}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.247}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.249}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.283}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.286}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 9}L2. {c |}{res} {ralign 7:-0.428}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-0.433}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-0.477}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-0.482}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-0.483}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-0.487}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 4}PCPIX_t1 {c |}{res} {ralign 7:0.422}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.576}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.408}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.469}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.354}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.396}{lalign 3:**}{txt} {space 1}
+{res}{txt}Output_~p_t1 {c |}{res} {ralign 7:0.189}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.195}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.181}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.184}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.154}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.155}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 3}PCPIX2_t1 {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.021}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.009}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.006}{lalign 3:}{txt} {space 1}
+{res}{txt}Output_~2_t1 {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.002}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.003}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.001}{lalign 3:}{txt} {space 1}
+{res}{txt}{space 7}_cons {c |}{res} {ralign 7:-0.070}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.301}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.072}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.168}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.014}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.080}{lalign 3:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}SIGMA2       {txt}{c |}{res}
+{txt}{space 7}_cons {c |}{res} {ralign 7:0.057}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.056}{lalign 3:***}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}HET          {txt}{c |}{res}
+{txt}{space 4}PCPIX_t1 {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.341}{lalign 3:**}{txt} {space 1}{res} {ralign 7:0.339}{lalign 3:**}{txt} {space 1}{res} {ralign 7:1.223}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.243}{lalign 3:***}{txt} {space 1}
+{res}{txt}Output_~p_t1 {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.057}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.046}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.129}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.126}{lalign 3:}{txt} {space 1}
+{res}{txt}{space 5}PCPI_t1 {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.834}{lalign 3:**}{txt} {space 1}{res} {ralign 7:-0.845}{lalign 3:**}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 9}VIX {c |}
+{space 9}L1. {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.073}{lalign 3:**}{txt} {space 1}{res} {ralign 7:0.073}{lalign 3:**}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 7}_cons {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-3.997}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-3.992}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-5.997}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-6.026}{lalign 3:***}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{lalign 12:Statistics}{txt} {c |} {center 10:} {space 1} {center 10:} {space 1} {center 10:} {space 1} {center 10:} {space 1} {center 10:} {space 1} {center 10:} {space 1}
+{res}{txt}{ralign 12:N} {c |}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}
+{res}{txt}{ralign 12:aic} {c |}{res} {ralign 7:9.970}{lalign 3:}{txt} {space 1}{res} {ralign 7:13.193}{lalign 3:}{txt} {space 1}{res} {ralign 7:9.342}{lalign 3:}{txt} {space 1}{res} {ralign 7:12.999}{lalign 3:}{txt} {space 1}{res} {ralign 7:-1.599}{lalign 3:}{txt} {space 1}{res} {ralign 7:2.261}{lalign 3:}{txt} {space 1}
+{res}{txt}{ralign 12:bic} {c |}{res} {ralign 7:23.794}{lalign 3:}{txt} {space 1}{res} {ralign 7:31.626}{lalign 3:}{txt} {space 1}{res} {ralign 7:27.775}{lalign 3:}{txt} {space 1}{res} {ralign 7:36.040}{lalign 3:}{txt} {space 1}{res} {ralign 7:21.442}{lalign 3:}{txt} {space 1}{res} {ralign 7:29.910}{lalign 3:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c BT}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{ralign 92:legend: * p<.1; ** p<.05; *** p<.01}
+{res}{txt}
+{com}. 
+. * --------------------------------- Non-linear ---------------------------------
+. 
+. arch PCPIX_t1 if $Greenspan, arch(1) garch(1)
+
+{txt}(setting optimization to BHHH)
+Iteration 0:{col 16}log likelihood = {res}-83.214459{txt}  
+Iteration 1:{col 16}log likelihood = {res}-78.488037{txt}  
+Iteration 2:{col 16}log likelihood = {res}-78.311447{txt}  
+Iteration 3:{col 16}log likelihood = {res}-76.000393{txt}  
+Iteration 4:{col 16}log likelihood = {res}-75.106696{txt}  
+(switching optimization to BFGS)
+Iteration 5:{col 16}log likelihood = {res}-73.649468{txt}  
+Iteration 6:{col 16}log likelihood = {res}-70.926345{txt}  
+Iteration 7:{col 16}log likelihood = {res}-70.509259{txt}  
+Iteration 8:{col 16}log likelihood = {res}-70.050548{txt}  
+Iteration 9:{col 16}log likelihood = {res} -69.42979{txt}  
+Iteration 10:{col 16}log likelihood = {res}-69.322814{txt}  
+Iteration 11:{col 16}log likelihood = {res}-69.271977{txt}  
+Iteration 12:{col 16}log likelihood = {res}-69.209345{txt}  
+Iteration 13:{col 16}log likelihood = {res}-69.150324{txt}  
+Iteration 14:{col 16}log likelihood = {res}-69.134175{txt}  
+(switching optimization to BHHH)
+Iteration 15:{col 16}log likelihood = {res}-69.133058{txt}  
+Iteration 16:{col 16}log likelihood = {res}-69.133019{txt}  
+Iteration 17:{col 16}log likelihood = {res}-69.133017{txt}  
+Iteration 18:{col 16}log likelihood = {res}-69.133016{txt}  
+
+ARCH family regression
+
+Sample: {res}1987q3 - 2005q4                           {txt}Number of obs   = {res}        74
+{txt}Distribution: {res}Gaussian                            {txt}Wald chi2({res}.{txt})    =  {res}        .
+{txt}Log likelihood = {res}-69.13302                        {txt}Prob > chi2     =     {res}     .
+
+{txt}{hline 13}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{col 14}{c |}{col 26}      OPG
+{col 1}    PCPIX_t1{col 14}{c |}      Coef.{col 26}   Std. Err.{col 38}      z{col 46}   P>|z|{col 54}     [95% Con{col 67}f. Interval]
+{hline 13}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{res}PCPIX_t1     {txt}{c |}
+{space 7}_cons {c |}{col 14}{res}{space 2} 2.458799{col 26}{space 2} .0419959{col 37}{space 1}   58.55{col 46}{space 3}0.000{col 54}{space 4} 2.376488{col 67}{space 3} 2.541109
+{txt}{hline 13}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{res}ARCH         {txt}{c |}
+{space 8}arch {c |}
+{space 9}L1. {c |}{col 14}{res}{space 2} .9105667{col 26}{space 2}  .524738{col 37}{space 1}    1.74{col 46}{space 3}0.083{col 54}{space 4}-.1179009{col 67}{space 3} 1.939034
+{txt}{space 12} {c |}
+{space 7}garch {c |}
+{space 9}L1. {c |}{col 14}{res}{space 2} .1347044{col 26}{space 2} .3581834{col 37}{space 1}    0.38{col 46}{space 3}0.707{col 54}{space 4}-.5673221{col 67}{space 3} .8367309
+{txt}{space 12} {c |}
+{space 7}_cons {c |}{col 14}{res}{space 2} .0083377{col 26}{space 2} .0312413{col 37}{space 1}    0.27{col 46}{space 3}0.790{col 54}{space 4}-.0528941{col 67}{space 3} .0695696
+{txt}{hline 13}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+
+{com}. predict Sigma2_PCPIX_t1 if $Greenspan, variance
+{txt}(215 missing values generated)
+
+{com}. 
+. qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 if $Greenspan, het(PCPI_t1 PCPIX_t1 Output_gap_t1 L.VIX) $vce 
+{txt}
+{com}. est store extended_2
+{txt}
+{com}. coef_ident_2
+
+Mean equation:
+{txt}Fed funds rate
+.8
+Inflation
+1.765
+Output gap
+.771
+
+{com}. 
+. qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 Sigma2_PCPIX_t1 if $Greenspan, het(PCPI_t1 PCPIX_t1 Output_gap_t1 L.VIX) $vce 
+{txt}
+{com}. est store extended_2_mean
+{txt}
+{com}. coef_ident_2_dolado
+
+Mean equation:
+{txt}Fed funds rate
+.8
+Inflation
+1.761
+Output gap
+.771
+Variance of inflation
+.003
+
+{com}. 
+. qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 Sigma2_PCPIX_t1 if $Greenspan, het(PCPI_t1 PCPIX_t1 Output_gap_t1 L.VIX Sigma2_PCPIX_t1) $vce 
+{txt}
+{com}. est store extended_2_mean_var
+{txt}
+{com}. coef_ident_2_dolado
+
+Mean equation:
+{txt}Fed funds rate
+.801
+Inflation
+1.898
+Output gap
+.771
+Variance of inflation
+-.096
+
+{com}. 
+. * Table 9: The estimation results of the models corresponding to linear and nonlinear versions of the Phillips curve
+. est table extended_2 extended_2_mean extended_2_mean_var, stat(N aic bic) star(0.1 0.05 0.01) b(%5.3f)
+{res}
+{txt}{hline 12}{c -}{c TT}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{ralign 12:Variable} {c |} {center 10:extended_2} {space 1} {center 10:extended~n} {space 1} {center 10:extended~r} {space 1}
+{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}FF_A         {txt}{c |}{res}
+{txt}{space 8}FF_A {c |}
+{space 9}L1. {c |}{res} {ralign 7:1.283}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.282}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.283}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 9}L2. {c |}{res} {ralign 7:-0.483}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-0.483}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-0.482}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 4}PCPIX_t1 {c |}{res} {ralign 7:0.354}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.353}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.378}{lalign 3:***}{txt} {space 1}
+{res}{txt}Output_~p_t1 {c |}{res} {ralign 7:0.154}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.155}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.154}{lalign 3:***}{txt} {space 1}
+{res}{txt}Sigma2_PCP~1 {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.001}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.019}{lalign 3:}{txt} {space 1}
+{res}{txt}{space 7}_cons {c |}{res} {ralign 7:-0.014}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.012}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.066}{lalign 3:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}HET          {txt}{c |}{res}
+{txt}{space 5}PCPI_t1 {c |}{res} {ralign 7:-0.834}{lalign 3:**}{txt} {space 1}{res} {ralign 7:-0.836}{lalign 3:**}{txt} {space 1}{res} {ralign 7:-1.121}{lalign 3:**}{txt} {space 1}
+{res}{txt}{space 4}PCPIX_t1 {c |}{res} {ralign 7:1.223}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.224}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.988}{lalign 3:**}{txt} {space 1}
+{res}{txt}Output_~p_t1 {c |}{res} {ralign 7:-0.129}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.129}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.142}{lalign 3:*}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 9}VIX {c |}
+{space 9}L1. {c |}{res} {ralign 7:0.073}{lalign 3:**}{txt} {space 1}{res} {ralign 7:0.073}{lalign 3:**}{txt} {space 1}{res} {ralign 7:0.079}{lalign 3:**}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+Sigma2_PCP~1 {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.223}{lalign 3:}{txt} {space 1}
+{res}{txt}{space 7}_cons {c |}{res} {ralign 7:-5.997}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-5.995}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-7.326}{lalign 3:***}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{lalign 12:Statistics}{txt} {c |} {center 10:} {space 1} {center 10:} {space 1} {center 10:} {space 1}
+{res}{txt}{ralign 12:N} {c |}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}
+{res}{txt}{ralign 12:aic} {c |}{res} {ralign 7:-1.599}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.400}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.965}{lalign 3:}{txt} {space 1}
+{res}{txt}{ralign 12:bic} {c |}{res} {ralign 7:21.442}{lalign 3:}{txt} {space 1}{res} {ralign 7:25.745}{lalign 3:}{txt} {space 1}{res} {ralign 7:28.614}{lalign 3:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c BT}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{ralign 53:legend: * p<.1; ** p<.05; *** p<.01}
+{res}{txt}
+{com}. 
+. * ---------------------------- Additional regressors ---------------------------
+. 
+. * Extended-2 model
+. qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 if ${c -(}Greenspan{c )-}, het(PCPI_t1 PCPIX_t1 Output_gap_t1 L.VIX) ${c -(}vce{c )-} 
+{txt}
+{com}. est store extended_2
+{txt}
+{com}. coef_ident_2
+
+Mean equation:
+{txt}Fed funds rate
+.8
+Inflation
+1.765
+Output gap
+.771
+
+{com}. 
+. * Extended-3 model
+. qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 if ${c -(}Greenspan{c )-}, het(PCPI_t1 PCPIX_t1 Output_gap_t1 L.VIX L.unrate) ${c -(}vce{c )-} 
+{txt}
+{com}. est store extended_3_1
+{txt}
+{com}. coef_ident_2
+
+Mean equation:
+{txt}Fed funds rate
+.797
+Inflation
+1.754
+Output gap
+.774
+
+{com}. 
+. * Extended-3 model
+. qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 if ${c -(}Greenspan{c )-}, het(PCPI_t1 PCPIX_t1 Output_gap_t1 L.VIX L.d_ln_reer) ${c -(}vce{c )-} 
+{txt}
+{com}. est store extended_3_2
+{txt}
+{com}. coef_ident_2
+
+Mean equation:
+{txt}Fed funds rate
+.799
+Inflation
+1.79
+Output gap
+.777
+
+{com}. 
+. * Extended-3 model
+. qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 if ${c -(}Greenspan{c )-}, het(PCPI_t1 PCPIX_t1 Output_gap_t1 L.VIX L.GS1 L.GSslope) ${c -(}vce{c )-} 
+{txt}
+{com}. est store extended_3_3
+{txt}
+{com}. coef_ident_2
+
+Mean equation:
+{txt}Fed funds rate
+.81
+Inflation
+1.793
+Output gap
+.778
+
+{com}. 
+. * Extended-3 model
+. qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 if ${c -(}Greenspan{c )-}, het(PCPI_t1 PCPIX_t1 Output_gap_t1 L.VIX L.unrate L.d_ln_reer L.GS1 L.GSslope) ${c -(}vce{c )-} 
+{txt}
+{com}. est store extended_3
+{txt}
+{com}. coef_ident_2
+
+Mean equation:
+{txt}Fed funds rate
+.804
+Inflation
+1.791
+Output gap
+.79
+
+{com}. 
+. * Table 10: The estimation results of the model with additional variance regressors for Alan Greenspan's era
+. est table extended_2 extended_3_1 extended_3_2 extended_3_3 extended_3, stat(N aic bic) star(0.1 0.05 0.01) b(%5.3f)
+{res}
+{txt}{hline 12}{c -}{c TT}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{ralign 12:Variable} {c |} {center 10:extended_2} {space 1} {center 10:extended~1} {space 1} {center 10:extended~2} {space 1} {center 10:extended~3} {space 1} {center 10:extended_3} {space 1}
+{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}FF_A         {txt}{c |}{res}
+{txt}{space 8}FF_A {c |}
+{space 9}L1. {c |}{res} {ralign 7:1.283}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.290}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.291}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.272}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.299}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 9}L2. {c |}{res} {ralign 7:-0.483}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-0.493}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-0.492}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-0.462}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-0.494}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 4}PCPIX_t1 {c |}{res} {ralign 7:0.354}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.356}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.359}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.341}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.350}{lalign 3:***}{txt} {space 1}
+{res}{txt}Output_~p_t1 {c |}{res} {ralign 7:0.154}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.157}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.156}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.148}{lalign 3:***}{txt} {space 1}{res} {ralign 7:0.155}{lalign 3:***}{txt} {space 1}
+{res}{txt}{space 7}_cons {c |}{res} {ralign 7:-0.014}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.009}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.031}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.017}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.024}{lalign 3:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{txt}{res}HET          {txt}{c |}{res}
+{txt}{space 5}PCPI_t1 {c |}{res} {ralign 7:-0.834}{lalign 3:**}{txt} {space 1}{res} {ralign 7:-0.916}{lalign 3:**}{txt} {space 1}{res} {ralign 7:-0.801}{lalign 3:**}{txt} {space 1}{res} {ralign 7:-0.705}{lalign 3:*}{txt} {space 1}{res} {ralign 7:-0.860}{lalign 3:**}{txt} {space 1}
+{res}{txt}{space 4}PCPIX_t1 {c |}{res} {ralign 7:1.223}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.265}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.210}{lalign 3:***}{txt} {space 1}{res} {ralign 7:1.569}{lalign 3:**}{txt} {space 1}{res} {ralign 7:1.538}{lalign 3:**}{txt} {space 1}
+{res}{txt}Output_~p_t1 {c |}{res} {ralign 7:-0.129}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.068}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.166}{lalign 3:*}{txt} {space 1}{res} {ralign 7:-0.260}{lalign 3:**}{txt} {space 1}{res} {ralign 7:-0.153}{lalign 3:}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 9}VIX {c |}
+{space 9}L1. {c |}{res} {ralign 7:0.073}{lalign 3:**}{txt} {space 1}{res} {ralign 7:0.083}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.078}{lalign 3:**}{txt} {space 1}{res} {ralign 7:0.061}{lalign 3:**}{txt} {space 1}{res} {ralign 7:0.091}{lalign 3:**}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 6}unrate {c |}
+{space 9}L1. {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.207}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.677}{lalign 3:}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 3}d_ln_reer {c |}
+{space 9}L1. {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.075}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.052}{lalign 3:}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 9}GS1 {c |}
+{space 9}L1. {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.399}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.407}{lalign 3:}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 5}GSslope {c |}
+{space 9}L1. {c |}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.820}{lalign 3:}{txt} {space 1}{res} {ralign 7:-1.035}{lalign 3:*}{txt} {space 1}
+{res}{txt}{space 12} {c |}
+{space 7}_cons {c |}{res} {ralign 7:-5.997}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-7.215}{lalign 3:*}{txt} {space 1}{res} {ralign 7:-6.202}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-4.177}{lalign 3:***}{txt} {space 1}{res} {ralign 7:-7.641}{lalign 3:**}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c +}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{res}{lalign 12:Statistics}{txt} {c |} {center 10:} {space 1} {center 10:} {space 1} {center 10:} {space 1} {center 10:} {space 1} {center 10:} {space 1}
+{res}{txt}{ralign 12:N} {c |}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}{res} {ralign 7:74}{lalign 3:}{txt} {space 1}
+{res}{txt}{ralign 12:aic} {c |}{res} {ralign 7:-1.599}{lalign 3:}{txt} {space 1}{res} {ralign 7:0.190}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.891}{lalign 3:}{txt} {space 1}{res} {ralign 7:-0.582}{lalign 3:}{txt} {space 1}{res} {ralign 7:1.256}{lalign 3:}{txt} {space 1}
+{res}{txt}{ralign 12:bic} {c |}{res} {ralign 7:21.442}{lalign 3:}{txt} {space 1}{res} {ralign 7:25.535}{lalign 3:}{txt} {space 1}{res} {ralign 7:24.454}{lalign 3:}{txt} {space 1}{res} {ralign 7:27.067}{lalign 3:}{txt} {space 1}{res} {ralign 7:33.512}{lalign 3:}{txt} {space 1}
+{res}{txt}{hline 12}{c -}{c BT}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}{c -}{hline 10}{c -}{c -}
+{ralign 79:legend: * p<.1; ** p<.05; *** p<.01}
+{res}{txt}
+{com}. 
+. * ==============================================================================
+. 
+. * The code below decomposes the changes in volatility into contributions of regressors
+. 
+. /*
+> gen v_PCPI_t1       = _b[HET:PCPI_t1]      *d.PCPI_t1
+> gen v_PCPIX_t1      = _b[HET:PCPIX_t1]     *d.PCPIX_t1
+> gen v_Output_gap_t1 = _b[HET:Output_gap_t1]*d.Output_gap_t1
+> gen v_L_VIX         = _b[HET:L.VIX]        *d.L.VIX
+> 
+> 
+> gen v_PCPI_t1_PCPIX_t1                     = v_PCPI_t1 + v_PCPIX_t1
+> gen v_PCPI_t1_PCPIX_t1_Output_gap_t1       = v_PCPI_t1 + v_PCPIX_t1 + v_Output_gap_t1
+> gen v_PCPI_PCPIX_Output_gap_VIX = v_PCPI_t1 + v_PCPIX_t1 + v_Output_gap_t1 + v_L_VIX
+> 
+> twoway (bar v_PCPI_t1_PCPIX_t1 date if ${c -(}Greenspan{c )-} & ((v_PCPI_t1 <= 0 & v_PCPIX_t1 <= 0) | (v_PCPI_t1 >= 0 & v_PCPIX_t1 >= 0)), lcolor(maroon) fcolor(maroon)) (bar v_PCPI_t1 date if ${c -(}Greenspan{c )-}, lcolor(navy) fcolor(navy)) (bar v_PCPIX_t1 date if ${c -(}Greenspan{c )-} & ((v_PCPI_t1 > 0 & v_PCPIX_t1 < 0) | (v_PCPI_t1 < 0 & v_PCPIX_t1 > 0)), lcolor(maroon) fcolor(maroon)) (line v_PCPI_t1_PCPIX_t1 date if ${c -(}Greenspan{c )-}, lcolor(black) lwidth(medthick)), ttitle("") tlabel(, format(%tqCY)) ytitle("%", orientation(horizontal)) ylabel(, angle(horizontal)) yline(0) legend(order(2 "Rule-based" 3 "Discretionary" 4 "Change of fed funds rate")) scheme(s1mono) name(g3,replace)
+> 
+> twoway (bar v_PCPI_t1_PCPIX_t1_Output_gap_t1 date if ${c -(}Greenspan{c )-} & (abs(v_PCPI_t1_PCPIX_t1_Output_gap_t1) >= abs(v_PCPI_t1_PCPIX_t1)), lcolor(red) fcolor(red)) ///
+>         (bar v_PCPI_t1_PCPIX_t1 date if ${c -(}Greenspan{c )-} & (abs(v_PCPI_t1_PCPIX_t1) >= abs(v_PCPI_t1)), lcolor(maroon) fcolor(maroon)) ///
+>         (bar v_PCPI_t1 date if ${c -(}Greenspan{c )-}, lcolor(navy) fcolor(navy)) ///
+>         (bar v_PCPIX_t1 date if ${c -(}Greenspan{c )-} & (abs(v_PCPI_t1_PCPIX_t1) < abs(v_PCPI_t1)), lcolor(maroon) fcolor(maroon)) ///
+>         (bar v_Output_gap_t1 date if ${c -(}Greenspan{c )-} & (abs(v_PCPI_t1_PCPIX_t1_Output_gap_t1) < abs(v_PCPI_t1_PCPIX_t1)), lcolor(red) fcolor(red)) ///
+>         (line v_PCPI_t1_PCPIX_t1_Output_gap_t1 date if ${c -(}Greenspan{c )-}, lcolor(black) lwidth(medthick)), ///
+>         ttitle("") tlabel(, format(%tqCY)) ytitle("%", orientation(horizontal)) ylabel(, angle(horizontal)) yline(0) legend(order(2 "Rule-based" 3 "Discretionary" 4 "Change of fed funds rate")) scheme(s1mono) name(g4,replace)
+> 
+> twoway (bar  date if ${c -(}Greenspan{c )-} & (abs(v_PCPI_t1_PCPIX_t1_Output_gap_t1) >= abs(v_PCPI_t1_PCPIX_t1)), lcolor(red) fcolor(red)) ///
+>         (bar  date if ${c -(}Greenspan{c )-} & (abs(v_PCPI_t1_PCPIX_t1) >= abs(v_PCPI_t1)), lcolor(maroon) fcolor(maroon)) ///
+>         (bar  date if ${c -(}Greenspan{c )-}, lcolor(navy) fcolor(navy)) ///
+>         (bar  date if ${c -(}Greenspan{c )-} & (abs(v_PCPI_t1_PCPIX_t1) < abs(v_PCPI_t1)), lcolor(maroon) fcolor(maroon)) ///
+>         (bar  date if ${c -(}Greenspan{c )-} & (abs(v_PCPI_t1_PCPIX_t1_Output_gap_t1) < abs(v_PCPI_t1_PCPIX_t1)), lcolor(red) fcolor(red)) ///
+>         (line  date if ${c -(}Greenspan{c )-}, lcolor(black) lwidth(medthick)), ///
+>         ttitle("") tlabel(, format(%tqCY)) ytitle("%", orientation(horizontal)) ylabel(, angle(horizontal)) yline(0) legend(order(2 "Rule-based" 3 "Discretionary" 4 "Change of fed funds rate")) scheme(s1mono) name(g4,replace)
+> 
+> twoway (bar v_PCPI_PCPIX_Output_gap_VIX date if ${c -(}Greenspan{c )-}) (bar v_PCPI_t1_PCPIX_t1_Output_gap_t1 date if ${c -(}Greenspan{c )-}) (bar v_PCPI_t1_PCPIX_t1 date if ${c -(}Greenspan{c )-}) (bar v_PCPI_t1 date if ${c -(}Greenspan{c )-})
+> */
+. 
+. * ================================== Appendix ==================================
+. 
+. /*
+> * Extended-2 model
+> qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 if ${c -(}Greenspan{c )-}, het(PCPI_t1 PCPIX_t1 Output_gap_t1 L.VIX) ${c -(}vce{c )-} 
+> est store extended_2
+> coef_ident_2
+> 
+> * Extended-3 model
+> qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 L.unrate if ${c -(}Greenspan{c )-}, het(PCPI_t1 PCPIX_t1 Output_gap_t1 L.VIX L.unrate) ${c -(}vce{c )-} 
+> est store extended_3_1_
+> coef_ident_2
+> 
+> * Extended-3 model
+> qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 L.d_ln_reer if ${c -(}Greenspan{c )-}, het(PCPI_t1 PCPIX_t1 Output_gap_t1 L.VIX L.d_ln_reer) ${c -(}vce{c )-} 
+> est store extended_3_2_
+> coef_ident_2
+> 
+> * Extended-3 model
+> qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 L.GS1 L.GS5 L.GS10 if ${c -(}Greenspan{c )-}, het(PCPI_t1 PCPIX_t1 Output_gap_t1 L.VIX L.GS1 L.GS5 L.GS10) ${c -(}vce{c )-} 
+> est store extended_3_3_
+> coef_ident_2
+> 
+> * Extended-3 model
+> qui arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 L.unrate L.d_ln_reer L.GS1 L.GS5 L.GS10 if ${c -(}Greenspan{c )-}, het(PCPI_t1 PCPIX_t1 Output_gap_t1 L.VIX L.unrate L.d_ln_reer L.GS1 L.GS5 L.GS10) ${c -(}vce{c )-} 
+> est store extended_3_
+> coef_ident_2
+> 
+> * Table 5: The estimation results with additional variance regressors
+> est table extended_2 extended_3_1_ extended_3_2_ extended_3_3_ extended_3_, stat(N ll aic bic) star(0.1 0.05 0.01) b(%5.3f)
+> */
+. 
+. * ==============================================================================
+. 
+. log close
+      {txt}name:  {res}<unnamed>
+       {txt}log:  {res}E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/log/do_model  8 May 2020.smcl
+  {txt}log type:  {res}smcl
+ {txt}closed on:  {res} 8 May 2020, 20:41:42
+{txt}{.-}
+{smcl}
+{txt}{sf}{ul off}

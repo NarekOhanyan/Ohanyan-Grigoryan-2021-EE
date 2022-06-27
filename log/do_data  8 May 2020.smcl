@@ -1,0 +1,4318 @@
+{smcl}
+{com}{sf}{ul off}{txt}{.-}
+      name:  {res}<unnamed>
+       {txt}log:  {res}E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/log/do_data  8 May 2020.smcl
+  {txt}log type:  {res}smcl
+ {txt}opened on:  {res} 8 May 2020, 21:26:34
+{txt}
+{com}. 
+. cd "${c -(}path{c )-}"
+{res}E:\Drive\my drive\private\research\rules-vs-discretion\files\estimation
+{txt}
+{com}. 
+. * ==============================================================================
+. 
+. do "${c -(}path{c )-}/stata/data/do/do_fed_funds_rate.do"
+{txt}
+{com}. * ==============================================================================
+. * 
+. * ==============================================================================
+. 
+. clear
+{txt}
+{com}. set more off
+{txt}
+{com}. set type double
+{txt}
+{com}. graph drop _all
+{txt}
+{com}. macro drop _all
+{txt}
+{com}. program drop _all
+{txt}
+{com}. 
+. * Defining a global for current path
+. if c(username) == "Narek" {c -(}
+.         global path "E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation"
+. {c )-}
+{txt}
+{com}. if c(username) == "apple" {c -(}
+.         global path "/Users/apple/Dropbox/Discretion_vs_Committment/RECENT VERSION"
+. {c )-}
+{txt}
+{com}. 
+. cd "${c -(}path{c )-}"
+{res}E:\Drive\my drive\private\research\rules-vs-discretion\files\estimation
+{txt}
+{com}. 
+. * ============================ Import Fed Funds data ===========================
+. 
+. import delimited "${c -(}path{c )-}/stata/data/in/FEDFUNDS.csv", clear
+{res}{text}(2 vars, 786 obs)
+
+{com}. * Generating date from date string
+. gen date_ = mdy(real(substr(date,6,2)),real(substr(date,9,2)),real(substr(date,1,4)))
+{txt}
+{com}. tsset date_, daily
+{res}{txt}{col 9}time variable:  {res}{col 25}date_, 01jul1954 to 01dec2019, but with gaps
+{txt}{col 17}delta:  {res}1 day
+{txt}
+{com}. gen quarter = qofd(date_)
+{txt}
+{com}. collapse (last) ff_e = fedfunds (mean) ff_a = fedfunds, by(quarter)
+{txt}
+{com}. rename quarter date
+{res}{txt}
+{com}. tsset date, quarterly
+{res}{txt}{col 9}time variable:  {res}{col 25}date, 1954q3 to 2019q4
+{txt}{col 17}delta:  {res}1 quarter
+{txt}
+{com}. 
+. rename ff_a FF_A
+{res}{txt}
+{com}. rename ff_e FF_E
+{res}{txt}
+{com}. 
+. save "${c -(}path{c )-}/stata/data/tmp/Data_FF.dta",replace
+{txt}file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/data/tmp/Data_FF.dta saved
+
+{com}. 
+{txt}end of do-file
+
+{com}. do "${c -(}path{c )-}/stata/data/do/do_vix_vxo.do"
+{txt}
+{com}. * ==============================================================================
+. * 
+. * ==============================================================================
+. 
+. clear
+{txt}
+{com}. set more off
+{txt}
+{com}. set type double
+{txt}
+{com}. graph drop _all
+{txt}
+{com}. macro drop _all
+{txt}
+{com}. program drop _all
+{txt}
+{com}. 
+. * Defining a global for current path
+. if c(username) == "Narek" {c -(}
+.         global path "E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation"
+. {c )-}
+{txt}
+{com}. if c(username) == "apple" {c -(}
+.         global path "/Users/apple/Dropbox/Discretion_vs_Committment/RECENT VERSION"
+. {c )-}
+{txt}
+{com}. 
+. cd "${c -(}path{c )-}"
+{res}E:\Drive\my drive\private\research\rules-vs-discretion\files\estimation
+{txt}
+{com}. 
+. * =============================== Import VIX data ==============================
+. 
+. import delimited "${c -(}path{c )-}/stata/data/in/VIXCLS.csv", clear
+{res}{text}(2 vars, 7,837 obs)
+
+{com}. * Generating date from date string
+. gen date_ = mdy(real(substr(date,6,2)),real(substr(date,9,2)),real(substr(date,1,4)))
+{txt}
+{com}. tsset date_, daily
+{res}{txt}{col 9}time variable:  {res}{col 25}date_, 02jan1990 to 15jan2020, but with gaps
+{txt}{col 17}delta:  {res}1 day
+{txt}
+{com}. gen quarter = qofd(date_)
+{txt}
+{com}. collapse (mean) vixcls, by(quarter)
+{txt}
+{com}. rename quarter date
+{res}{txt}
+{com}. tsset date, quarterly
+{res}{txt}{col 9}time variable:  {res}{col 25}date, 1990q1 to 2020q1
+{txt}{col 17}delta:  {res}1 quarter
+{txt}
+{com}. 
+. rename vixcls VIX
+{res}{txt}
+{com}. 
+. save "${c -(}path{c )-}/stata/data/tmp/Data_VIX.dta",replace
+{txt}file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/data/tmp/Data_VIX.dta saved
+
+{com}. 
+. * =============================== Import VXO data ==============================
+. 
+. import delimited "${c -(}path{c )-}/stata/data/in/VXOCLS.csv", clear
+{res}{text}(2 vars, 8,880 obs)
+
+{com}. * Generating date from date string
+. gen date_ = mdy(real(substr(date,6,2)),real(substr(date,9,2)),real(substr(date,1,4)))
+{txt}
+{com}. tsset date_, daily
+{res}{txt}{col 9}time variable:  {res}{col 25}date_, 02jan1986 to 15jan2020, but with gaps
+{txt}{col 17}delta:  {res}1 day
+{txt}
+{com}. gen quarter = qofd(date_)
+{txt}
+{com}. collapse (mean) vxocls, by(quarter)
+{txt}
+{com}. rename quarter date
+{res}{txt}
+{com}. tsset date, quarterly
+{res}{txt}{col 9}time variable:  {res}{col 25}date, 1986q1 to 2020q1
+{txt}{col 17}delta:  {res}1 quarter
+{txt}
+{com}. 
+. rename vxocls VXO
+{res}{txt}
+{com}. 
+. save "${c -(}path{c )-}/stata/data/tmp/Data_VXO.dta",replace
+{txt}file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/data/tmp/Data_VXO.dta saved
+
+{com}. 
+{txt}end of do-file
+
+{com}. do "${c -(}path{c )-}/stata/data/do/do_pgdp.do"
+{txt}
+{com}. * ==============================================================================
+. * 
+. * ==============================================================================
+. 
+. clear
+{txt}
+{com}. set more off
+{txt}
+{com}. set type double
+{txt}
+{com}. graph drop _all
+{txt}
+{com}. macro drop _all
+{txt}
+{com}. program drop _all
+{txt}
+{com}. 
+. * Defining a global for current path
+. if c(username) == "Narek" {c -(}
+.         global path "E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation"
+. {c )-}
+{txt}
+{com}. if c(username) == "apple" {c -(}
+.         global path "/Users/apple/Dropbox/Discretion_vs_Committment/RECENT VERSION"
+. {c )-}
+{txt}
+{com}. 
+. cd "${c -(}path{c )-}"
+{res}E:\Drive\my drive\private\research\rules-vs-discretion\files\estimation
+{txt}
+{com}. 
+. tempfile part1 part2
+{txt}
+{com}. 
+. * ================================ Import PGDP data =============================
+. 
+. * Merge two parts
+. import excel "${c -(}path{c )-}/stata/data/in/gPGDP_1967_1984.xlsx", sheet("gPGDP_1967_1984") firstrow clear
+{res}{txt}
+{com}. save `part1'
+{txt}file C:\Users\Narek\AppData\Local\Temp\ST_16c8_000001.tmp saved
+
+{com}. import excel "${c -(}path{c )-}/stata/data/in/gPGDP_1985_Last.xlsx", sheet("gPGDP_1985_Last") firstrow clear
+{res}{txt}
+{com}. save `part2'
+{txt}file C:\Users\Narek\AppData\Local\Temp\ST_16c8_000002.tmp saved
+
+{com}. use `part1'
+{txt}
+{com}. merge 1:1 Date using `part2', nogenerate
+{res}
+{txt}{col 5}Result{col 38}# of obs.
+{col 5}{hline 41}
+{col 5}not matched{col 30}{res}               0
+{txt}{col 5}matched{col 30}{res}             196{txt}  
+{col 5}{hline 41}
+
+{com}. 
+. * Take transpose of the data
+. xpose, clear varname promote
+{txt}
+{com}. 
+. * Rename the variables
+. foreach var of varlist v* {c -(}
+{txt}  2{com}.         local f = subinstr(string(`var'[1]),".","_",.)
+{txt}  3{com}.         local new_var_name = "q" + "`f'"
+{txt}  4{com}.         rename `var' `new_var_name'
+{txt}  5{com}. {c )-}
+{res}{txt}
+{com}. local new_var_name = _varname[1]
+{txt}
+{com}. rename _varname `new_var_name'
+{res}{txt}
+{com}. drop in 1
+{txt}(1 observation deleted)
+
+{com}. replace Date = subinstr(Date,"gPGDP_","",.)
+{txt}(426 real changes made)
+
+{com}. 
+. * Generating date from Date string
+. gen date = mdy(real(substr(Date,5,2)),real(substr(Date,7,2)),real(substr(Date,1,4)))
+{txt}
+{com}. tsset date, daily
+{res}{txt}{col 9}time variable:  {res}{col 25}date, 29mar1967 to 05dec2012, but with gaps
+{txt}{col 17}delta:  {res}1 day
+{txt}
+{com}. gen quarter = qofd(date)
+{txt}
+{com}. drop date Date
+{txt}
+{com}. rename quarter date
+{res}{txt}
+{com}. 
+. * Get average projections by quarters
+. collapse (mean) q*, by(date)
+{txt}
+{com}. tsset date, quarterly
+{res}{txt}{col 9}time variable:  {res}{col 25}date, 1967q1 to 2012q4
+{txt}{col 17}delta:  {res}1 quarter
+{txt}
+{com}. 
+. * =================== Extracting PGDP projections from the data =================
+. 
+. * Defining globals for from t-4 to t+4
+. global PGDP_t_4 q1966_1
+{txt}
+{com}. global PGDP_t_3 q1966_2
+{txt}
+{com}. global PGDP_t_2 q1966_3
+{txt}
+{com}. global PGDP_t_1 q1966_4
+{txt}
+{com}. global PGDP_t   q1967_1
+{txt}
+{com}. global PGDP_t1  q1967_2
+{txt}
+{com}. global PGDP_t2  q1967_3
+{txt}
+{com}. global PGDP_t3  q1967_4
+{txt}
+{com}. global PGDP_t4  q1968_1
+{txt}
+{com}. 
+. * Extracting diagonal elements as projections
+. foreach a in "t_4" "t_3" "t_2" "t_1" "t" "t1" "t2" "t3" "t4" {c -(}
+{txt}  2{com}.         * Importing variables q* to Mata
+.         putmata PGDP_`a' = (q*),replace
+{txt}  3{com}.         * Extracting diagonal elements
+.         mata: PGDP_`a'_d = diagonal(PGDP_`a') 
+{txt}  4{com}.         `end'
+{txt}  5{com}.         * Extracting variable from Mata matrix
+.         getmata PGDP_`a' = PGDP_`a'_d,replace
+{txt}  6{com}.         * Rounding the numbers
+.         gen PGDP_`a'_r = round(PGDP_`a', .01)
+{txt}  7{com}.         drop PGDP_`a'
+{txt}  8{com}.         rename PGDP_`a'_r PGDP_`a'
+{txt}  9{com}.         * Dropping observations sequentially
+.         drop ${c -(}PGDP_`a'{c )-}
+{txt} 10{com}. {c )-}
+{res}{txt}(1 matrix posted)
+{res}{txt}(33 missing values generated)
+{res}{txt}(1 matrix posted)
+{res}{txt}(10 missing values generated)
+{res}{txt}(1 matrix posted)
+{res}{txt}(1 matrix posted)
+{res}{txt}(1 matrix posted)
+{res}{txt}(1 matrix posted)
+{res}{txt}(1 matrix posted)
+{res}{txt}(6 missing values generated)
+{res}{txt}(1 matrix posted)
+{res}{txt}(9 missing values generated)
+{res}{txt}(1 matrix posted)
+{res}{txt}(19 missing values generated)
+{res}{txt}
+{com}. * Dropping the raw data
+. drop q*
+{txt}
+{com}. 
+. save "${c -(}path{c )-}/stata/data/tmp/Data_PGDP_pr.dta",replace
+{txt}file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/data/tmp/Data_PGDP_pr.dta saved
+
+{com}. 
+{txt}end of do-file
+
+{com}. do "${c -(}path{c )-}/stata/data/do/do_pcpi.do"
+{txt}
+{com}. * ==============================================================================
+. * 
+. * ==============================================================================
+. 
+. clear
+{txt}
+{com}. set more off
+{txt}
+{com}. set type double
+{txt}
+{com}. graph drop _all
+{txt}
+{com}. macro drop _all
+{txt}
+{com}. program drop _all
+{txt}
+{com}. 
+. * Defining a global for current path
+. if c(username) == "Narek" {c -(}
+.         global path "E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation"
+. {c )-}
+{txt}
+{com}. if c(username) == "apple" {c -(}
+.         global path "/Users/apple/Dropbox/Discretion_vs_Committment/RECENT VERSION"
+. {c )-}
+{txt}
+{com}. 
+. cd "${c -(}path{c )-}"
+{res}E:\Drive\my drive\private\research\rules-vs-discretion\files\estimation
+{txt}
+{com}. 
+. tempfile part1 part2
+{txt}
+{com}. 
+. * ================================ Import CPI data =============================
+. 
+. * Merge two parts
+. import excel "${c -(}path{c )-}/stata/data/in/gPCPI_1967_1984.xlsx", sheet("gPCPI_1967_1984") firstrow clear
+{res}{txt}
+{com}. save `part1'
+{txt}file C:\Users\Narek\AppData\Local\Temp\ST_16c8_000001.tmp saved
+
+{com}. import excel "${c -(}path{c )-}/stata/data/in/gPCPI_1985_Last.xlsx", sheet("gPCPI_1985_Last") firstrow clear
+{res}{txt}
+{com}. save `part2'
+{txt}file C:\Users\Narek\AppData\Local\Temp\ST_16c8_000002.tmp saved
+
+{com}. use `part1'
+{txt}
+{com}. merge 1:1 Date using `part2', nogenerate
+{res}
+{txt}{col 5}Result{col 38}# of obs.
+{col 5}{hline 41}
+{col 5}not matched{col 30}{res}               0
+{txt}{col 5}matched{col 30}{res}             196{txt}  
+{col 5}{hline 41}
+
+{com}. 
+. * Take transpose of the data
+. xpose, clear varname promote
+{txt}
+{com}. 
+. * Rename the variables
+. foreach var of varlist v* {c -(}
+{txt}  2{com}.         local f = subinstr(string(`var'[1]),".","_",.)
+{txt}  3{com}.         local new_var_name = "q" + "`f'"
+{txt}  4{com}.         rename `var' `new_var_name'
+{txt}  5{com}. {c )-}
+{res}{txt}
+{com}. local new_var_name = _varname[1]
+{txt}
+{com}. rename _varname `new_var_name'
+{res}{txt}
+{com}. drop in 1
+{txt}(1 observation deleted)
+
+{com}. replace Date = subinstr(Date,"gPCPI_","",.)
+{txt}(426 real changes made)
+
+{com}. 
+. * Generating date from Date string
+. gen date = mdy(real(substr(Date,5,2)),real(substr(Date,7,2)),real(substr(Date,1,4)))
+{txt}
+{com}. tsset date, daily
+{res}{txt}{col 9}time variable:  {res}{col 25}date, 29mar1967 to 05dec2012, but with gaps
+{txt}{col 17}delta:  {res}1 day
+{txt}
+{com}. gen quarter = qofd(date)
+{txt}
+{com}. drop date Date
+{txt}
+{com}. rename quarter date
+{res}{txt}
+{com}. 
+. * Drop missing values
+. drop q1966_1-q1978_3
+{txt}
+{com}. drop if date <= tq(1979q3)
+{txt}(157 observations deleted)
+
+{com}. 
+. * Get average projections by quarters
+. collapse (mean) q*, by(date)
+{txt}
+{com}. tsset date, quarterly
+{res}{txt}{col 9}time variable:  {res}{col 25}date, 1979q4 to 2012q4
+{txt}{col 17}delta:  {res}1 quarter
+{txt}
+{com}. 
+. * =================== Extracting CPI projections from the data =================
+. 
+. * Defining globals for from t-4 to t+4
+. global PCPI_t_4 q1978_4
+{txt}
+{com}. global PCPI_t_3 q1979_1
+{txt}
+{com}. global PCPI_t_2 q1979_2
+{txt}
+{com}. global PCPI_t_1 q1979_3
+{txt}
+{com}. global PCPI_t   q1979_4
+{txt}
+{com}. global PCPI_t1  q1980_1
+{txt}
+{com}. global PCPI_t2  q1980_2
+{txt}
+{com}. global PCPI_t3  q1980_3
+{txt}
+{com}. global PCPI_t4  q1980_4
+{txt}
+{com}. 
+. * Extracting diagonal elements as projections
+. foreach a in "t_4" "t_3" "t_2" "t_1" "t" "t1" "t2" "t3" "t4" {c -(}
+{txt}  2{com}.         * Importing variables q* to Mata
+.         putmata PCPI_`a' = (q*),replace
+{txt}  3{com}.         * Extracting diagonal elements
+.         mata: PCPI_`a'_d = diagonal(PCPI_`a') 
+{txt}  4{com}.         `end'
+{txt}  5{com}.         * Extracting variable from Mata matrix
+.         getmata PCPI_`a' = PCPI_`a'_d,replace
+{txt}  6{com}.         * Rounding the numbers
+.         gen PCPI_`a'_r = round(PCPI_`a', .01)
+{txt}  7{com}.         drop PCPI_`a'
+{txt}  8{com}.         rename PCPI_`a'_r PCPI_`a'
+{txt}  9{com}.         * Dropping observations sequentially
+.         drop ${c -(}PCPI_`a'{c )-}
+{txt} 10{com}. {c )-}
+{res}{txt}(1 matrix posted)
+{res}{txt}(15 missing values generated)
+{res}{txt}(1 matrix posted)
+{res}{txt}(4 missing values generated)
+{res}{txt}(1 matrix posted)
+{res}{txt}(1 matrix posted)
+{res}{txt}(1 matrix posted)
+{res}{txt}(1 matrix posted)
+{res}{txt}(1 matrix posted)
+{res}{txt}(1 matrix posted)
+{res}{txt}(1 matrix posted)
+{res}{txt}
+{com}. * Dropping the raw data
+. drop q*
+{txt}
+{com}. 
+. save "${c -(}path{c )-}/stata/data/tmp/Data_PCPI_pr.dta",replace
+{txt}file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/data/tmp/Data_PCPI_pr.dta saved
+
+{com}. 
+{txt}end of do-file
+
+{com}. do "${c -(}path{c )-}/stata/data/do/do_pcpix.do"
+{txt}
+{com}. * ==============================================================================
+. * 
+. * ==============================================================================
+. 
+. clear
+{txt}
+{com}. set more off
+{txt}
+{com}. set type double
+{txt}
+{com}. graph drop _all
+{txt}
+{com}. macro drop _all
+{txt}
+{com}. program drop _all
+{txt}
+{com}. 
+. * Defining a global for current path
+. if c(username) == "Narek" {c -(}
+.         global path "E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation"
+. {c )-}
+{txt}
+{com}. if c(username) == "apple" {c -(}
+.         global path "/Users/apple/Dropbox/Discretion_vs_Committment/RECENT VERSION"
+. {c )-}
+{txt}
+{com}. 
+. cd "${c -(}path{c )-}"
+{res}E:\Drive\my drive\private\research\rules-vs-discretion\files\estimation
+{txt}
+{com}. 
+. tempfile part1 part2
+{txt}
+{com}. 
+. * ============================ Import Core CPI data ============================
+. 
+. * Merge two parts
+. import excel "${c -(}path{c )-}/stata/data/in/gPCPIX_1967_1984.xlsx", sheet("gPCPIX_1967_1984") firstrow clear
+{res}{txt}
+{com}. save `part1'
+{txt}file C:\Users\Narek\AppData\Local\Temp\ST_16c8_000001.tmp saved
+
+{com}. import excel "${c -(}path{c )-}/stata/data/in/gPCPIX_1985_Last.xlsx", sheet("gPCPIX_1985_Last") firstrow clear
+{res}{txt}
+{com}. save `part2'
+{txt}file C:\Users\Narek\AppData\Local\Temp\ST_16c8_000002.tmp saved
+
+{com}. use `part1'
+{txt}
+{com}. merge 1:1 Date using `part2', nogenerate
+{res}
+{txt}{col 5}Result{col 38}# of obs.
+{col 5}{hline 41}
+{col 5}not matched{col 30}{res}               0
+{txt}{col 5}matched{col 30}{res}             196{txt}  
+{col 5}{hline 41}
+
+{com}. 
+. * Take transpose of the data
+. xpose, clear varname promote
+{txt}
+{com}. 
+. * Rename the variables
+. foreach var of varlist v* {c -(}
+{txt}  2{com}.         local f = subinstr(string(`var'[1]),".","_",.)
+{txt}  3{com}.         local new_var_name = "q" + "`f'"
+{txt}  4{com}.         rename `var' `new_var_name'
+{txt}  5{com}. {c )-}
+{res}{txt}
+{com}. local new_var_name = _varname[1]
+{txt}
+{com}. rename _varname `new_var_name'
+{res}{txt}
+{com}. drop in 1
+{txt}(1 observation deleted)
+
+{com}. replace Date = subinstr(Date,"gPCPIX_","",.)
+{txt}(426 real changes made)
+
+{com}. 
+. * Generating date from Date string
+. gen date = mdy(real(substr(Date,5,2)),real(substr(Date,7,2)),real(substr(Date,1,4)))
+{txt}
+{com}. tsset date, daily
+{res}{txt}{col 9}time variable:  {res}{col 25}date, 29mar1967 to 05dec2012, but with gaps
+{txt}{col 17}delta:  {res}1 day
+{txt}
+{com}. gen quarter = qofd(date)
+{txt}
+{com}. drop date Date
+{txt}
+{com}. rename quarter date
+{res}{txt}
+{com}. 
+. * Drop missing values
+. drop q1966_1-q1984_4
+{txt}
+{com}. drop if date <= tq(1985q4)
+{txt}(210 observations deleted)
+
+{com}. 
+. * Get average projections by quarters
+. collapse (mean) q*, by(date)
+{txt}
+{com}. tsset date, quarterly
+{res}{txt}{col 9}time variable:  {res}{col 25}date, 1986q1 to 2012q4
+{txt}{col 17}delta:  {res}1 quarter
+{txt}
+{com}.  
+. * ================ Extracting Core CPI projections from the data ===============
+. 
+. * Defining globals for from t-4 to t+4
+. global PCPIX_t_4 q1985_1
+{txt}
+{com}. global PCPIX_t_3 q1985_2
+{txt}
+{com}. global PCPIX_t_2 q1985_3
+{txt}
+{com}. global PCPIX_t_1 q1985_4
+{txt}
+{com}. global PCPIX_t   q1986_1
+{txt}
+{com}. global PCPIX_t1  q1986_2
+{txt}
+{com}. global PCPIX_t2  q1986_3
+{txt}
+{com}. global PCPIX_t3  q1986_4
+{txt}
+{com}. global PCPIX_t4  q1987_1
+{txt}
+{com}. 
+. * Extracting diagonal elemens as projections
+. foreach a in "t_4" "t_3" "t_2" "t_1" "t" "t1" "t2" "t3" "t4" {c -(}
+{txt}  2{com}.         * Importing variables q* to Mata
+.         putmata PCPIX_`a' = (q*),replace
+{txt}  3{com}.         * Extracting diagonal elements
+.         mata: PCPIX_`a'_d = diagonal(PCPIX_`a') 
+{txt}  4{com}.         `end'
+{txt}  5{com}.         * Extracting variable from Mata matrix
+.         getmata PCPIX_`a' = PCPIX_`a'_d,replace
+{txt}  6{com}.         * Rounding the numbers
+.         gen PCPIX_`a'_r = round(PCPIX_`a', .01)
+{txt}  7{com}.         drop PCPIX_`a'
+{txt}  8{com}.         rename PCPIX_`a'_r PCPIX_`a'
+{txt}  9{com}.         * Dropping observations sequentially
+.         drop ${c -(}PCPIX_`a'{c )-}
+{txt} 10{com}. {c )-}
+{res}{txt}(1 matrix posted)
+{res}{txt}(18 missing values generated)
+{res}{txt}(1 matrix posted)
+{res}{txt}(5 missing values generated)
+{res}{txt}(1 matrix posted)
+{res}{txt}(1 matrix posted)
+{res}{txt}(1 matrix posted)
+{res}{txt}(1 matrix posted)
+{res}{txt}(1 matrix posted)
+{res}{txt}(1 matrix posted)
+{res}{txt}(1 matrix posted)
+{res}{txt}
+{com}. * Dropping the raw data
+. drop q*
+{txt}
+{com}. 
+. save "${c -(}path{c )-}/stata/data/tmp/Data_PCPIX_pr.dta",replace
+{txt}file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/data/tmp/Data_PCPIX_pr.dta saved
+
+{com}. 
+{txt}end of do-file
+
+{com}. do "${c -(}path{c )-}/stata/data/do/do_rgdp.do"
+{txt}
+{com}. * ==============================================================================
+. * 
+. * ==============================================================================
+. 
+. clear
+{txt}
+{com}. set more off
+{txt}
+{com}. set type double
+{txt}
+{com}. graph drop _all
+{txt}
+{com}. macro drop _all
+{txt}
+{com}. program drop _all
+{txt}
+{com}. 
+. * Defining a global for current path
+. if c(username) == "Narek" {c -(}
+.         global path "E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation"
+. {c )-}
+{txt}
+{com}. if c(username) == "apple" {c -(}
+.         global path "/Users/apple/Dropbox/Discretion_vs_Committment/RECENT VERSION"
+. {c )-}
+{txt}
+{com}. 
+. cd "${c -(}path{c )-}"
+{res}E:\Drive\my drive\private\research\rules-vs-discretion\files\estimation
+{txt}
+{com}. 
+. tempfile part1 part2
+{txt}
+{com}. 
+. * ================================ Import RGDP data =============================
+. 
+. * Merge two parts
+. import excel "${c -(}path{c )-}/stata/data/in/gRGDP_1967_1984.xlsx", sheet("gRGDP_1967_1984") firstrow clear
+{res}{txt}
+{com}. save `part1'
+{txt}file C:\Users\Narek\AppData\Local\Temp\ST_16c8_000001.tmp saved
+
+{com}. import excel "${c -(}path{c )-}/stata/data/in/gRGDP_1985_Last.xlsx", sheet("gRGDP_1985_Last") firstrow clear
+{res}{txt}
+{com}. save `part2'
+{txt}file C:\Users\Narek\AppData\Local\Temp\ST_16c8_000002.tmp saved
+
+{com}. use `part1'
+{txt}
+{com}. merge 1:1 Date using `part2', nogenerate
+{res}
+{txt}{col 5}Result{col 38}# of obs.
+{col 5}{hline 41}
+{col 5}not matched{col 30}{res}               0
+{txt}{col 5}matched{col 30}{res}             196{txt}  
+{col 5}{hline 41}
+
+{com}. 
+. * Take transpose of the data
+. xpose, clear varname promote
+{txt}
+{com}. 
+. * Rename the variables
+. foreach var of varlist v* {c -(}
+{txt}  2{com}.         local f = subinstr(string(`var'[1]),".","_",.)
+{txt}  3{com}.         local new_var_name = "q" + "`f'"
+{txt}  4{com}.         rename `var' `new_var_name'
+{txt}  5{com}. {c )-}
+{res}{txt}
+{com}. local new_var_name = _varname[1]
+{txt}
+{com}. rename _varname `new_var_name'
+{res}{txt}
+{com}. drop in 1
+{txt}(1 observation deleted)
+
+{com}. replace Date = subinstr(Date,"gRGDP_","",.)
+{txt}(426 real changes made)
+
+{com}. 
+. * Generating date from Date string
+. gen date = mdy(real(substr(Date,5,2)),real(substr(Date,7,2)),real(substr(Date,1,4)))
+{txt}
+{com}. tsset date, daily
+{res}{txt}{col 9}time variable:  {res}{col 25}date, 29mar1967 to 05dec2012, but with gaps
+{txt}{col 17}delta:  {res}1 day
+{txt}
+{com}. gen quarter = qofd(date)
+{txt}
+{com}. drop date Date
+{txt}
+{com}. rename quarter date
+{res}{txt}
+{com}. 
+. * Get average projections by quarters
+. collapse (mean) q*, by(date)
+{txt}
+{com}. tsset date, quarterly
+{res}{txt}{col 9}time variable:  {res}{col 25}date, 1967q1 to 2012q4
+{txt}{col 17}delta:  {res}1 quarter
+{txt}
+{com}. 
+. * =================== Extracting RGDP projections from the data =================
+. 
+. * Defining globals for from t-4 to t+4
+. global RGDP_t_4 q1966_1
+{txt}
+{com}. global RGDP_t_3 q1966_2
+{txt}
+{com}. global RGDP_t_2 q1966_3
+{txt}
+{com}. global RGDP_t_1 q1966_4
+{txt}
+{com}. global RGDP_t   q1967_1
+{txt}
+{com}. global RGDP_t1  q1967_2
+{txt}
+{com}. global RGDP_t2  q1967_3
+{txt}
+{com}. global RGDP_t3  q1967_4
+{txt}
+{com}. global RGDP_t4  q1968_1
+{txt}
+{com}. 
+. * Extracting diagonal elements as projections
+. foreach a in "t_4" "t_3" "t_2" "t_1" "t" "t1" "t2" "t3" "t4" {c -(}
+{txt}  2{com}.         * Importing variables q* to Mata
+.         putmata RGDP_`a' = (q*),replace
+{txt}  3{com}.         * Extracting diagonal elements
+.         mata: RGDP_`a'_d = diagonal(RGDP_`a') 
+{txt}  4{com}.         `end'
+{txt}  5{com}.         * Extracting variable from Mata matrix
+.         getmata RGDP_`a' = RGDP_`a'_d,replace
+{txt}  6{com}.         * Rounding the numbers
+.         gen RGDP_`a'_r = round(RGDP_`a', .01)
+{txt}  7{com}.         drop RGDP_`a'
+{txt}  8{com}.         rename RGDP_`a'_r RGDP_`a'
+{txt}  9{com}.         * Dropping observations sequentially
+.         drop ${c -(}RGDP_`a'{c )-}
+{txt} 10{com}. {c )-}
+{res}{txt}(1 matrix posted)
+{res}{txt}(30 missing values generated)
+{res}{txt}(1 matrix posted)
+{res}{txt}(9 missing values generated)
+{res}{txt}(1 matrix posted)
+{res}{txt}(1 matrix posted)
+{res}{txt}(1 matrix posted)
+{res}{txt}(1 matrix posted)
+{res}{txt}(1 matrix posted)
+{res}{txt}(6 missing values generated)
+{res}{txt}(1 matrix posted)
+{res}{txt}(9 missing values generated)
+{res}{txt}(1 matrix posted)
+{res}{txt}(19 missing values generated)
+{res}{txt}
+{com}. * Dropping the raw data
+. drop q*
+{txt}
+{com}. 
+. save "${c -(}path{c )-}/stata/data/tmp/Data_RGDP_pr.dta",replace
+{txt}file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/data/tmp/Data_RGDP_pr.dta saved
+
+{com}. 
+{txt}end of do-file
+
+{com}. do "${c -(}path{c )-}/stata/data/do/do_output_gap_dt.do"
+{txt}
+{com}. * ==============================================================================
+. * 
+. * ==============================================================================
+. 
+. clear
+{txt}
+{com}. set more off
+{txt}
+{com}. set type double
+{txt}
+{com}. graph drop _all
+{txt}
+{com}. macro drop _all
+{txt}
+{com}. program drop _all
+{txt}
+{com}. 
+. * Defining a global for current path
+. if c(username) == "Narek" {c -(}
+.         global path "E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation"
+. {c )-}
+{txt}
+{com}. if c(username) == "apple" {c -(}
+.         global path "/Users/apple/Dropbox/Discretion_vs_Committment/RECENT VERSION"
+. {c )-}
+{txt}
+{com}. 
+. cd "${c -(}path{c )-}"
+{res}E:\Drive\my drive\private\research\rules-vs-discretion\files\estimation
+{txt}
+{com}. 
+. * =========================== Import Real GDP gap data =========================
+. 
+. import excel "${c -(}path{c )-}/stata/data/in/ROUTPUTQvQd.xlsx", sheet("ROUTPUT") firstrow clear
+{res}{txt}
+{com}. 
+. qui destring ROUTPUT*, replace ignore(`"#N/A"')
+{txt}
+{com}. 
+. gen date = yq(real(substr(DATE,1,4)),real(substr(DATE,-1,1)))
+{txt}(1 missing value generated)
+
+{com}. tsset date, quarterly
+{res}{txt}{col 9}time variable:  {res}{col 25}date, 1947q1 to 2018q4
+{txt}{col 17}delta:  {res}1 quarter
+{txt}
+{com}. drop DATE
+{txt}
+{com}. 
+. merge 1:1 date using "${c -(}path{c )-}/stata/data/tmp/Data_RGDP_pr.dta", nogenerate
+{res}
+{txt}{col 5}Result{col 38}# of obs.
+{col 5}{hline 41}
+{col 5}not matched{col 30}{res}             105
+{txt}{col 9}from master{col 30}{res}             105{txt}  
+{col 9}from using{col 30}{res}               0{txt}  
+
+{col 5}matched{col 30}{res}             184{txt}  
+{col 5}{hline 41}
+
+{com}. 
+. *drop if date < tq(1967q1)
+. drop ROUTPUT65Q4-ROUTPUT66Q4
+{txt}
+{com}. 
+. foreach var of varlist ROUTPUT* {c -(}
+{txt}  2{com}.         if real(substr("`var'",8,2)) > 50 {c -(}
+{txt}  3{com}.                 local new_var_name = "Y19" + substr("`var'",8,4)        
+{txt}  4{com}.         {c )-}
+{txt}  5{com}.         if real(substr("`var'",8,2)) < 50 {c -(}
+{txt}  6{com}.                 local new_var_name = "Y20" + substr("`var'",8,4)        
+{txt}  7{com}.         {c )-}
+{txt}  8{com}.         rename `var' `new_var_name'
+{txt}  9{com}. {c )-}
+{res}{txt}
+{com}. 
+. rename RGDP_t RGDP_t0
+{res}{txt}
+{com}. replace Y1996Q1 = L1.Y1996Q1*(1 + RGDP_t_1[197]/100) if date == tq(1995q4)
+{txt}(1 real change made)
+
+{com}. 
+. gen t = _n
+{txt}
+{com}. gen t2 = t^2
+{txt}
+{com}. foreach lead of num 0/4 {c -(}
+{txt}  2{com}.         gen Output_gap_dt_t`lead' = .
+{txt}  3{com}. {c )-}
+{txt}(289 missing values generated)
+(289 missing values generated)
+(289 missing values generated)
+(289 missing values generated)
+(289 missing values generated)
+
+{com}. foreach var of varlist Y* {c -(}
+{txt}  2{com}.         local year = substr("`var'",2,4)
+{txt}  3{com}.         local quarter = substr("`var'",-1,1)
+{txt}  4{com}.         local date = "`year'" + "q" + "`quarter'"
+{txt}  5{com}.         local row = tq(`date') - date[1] + 1
+{txt}  6{com}.         foreach lead of num 0/4 {c -(}
+{txt}  7{com}.                 replace `var' = L.`var'*(1 + RGDP_t`lead'[`row']/100) if date == tq(`date')+`lead'
+{txt}  8{com}.         {c )-}
+{txt}  9{com}.         gen log_var = ln(`var')
+{txt} 10{com}.         qui reg log_var t t2 if date < tq(`date') & date > tq(`date')-51
+{txt} 11{com}. /*      if _rc != 0 {c -(}
+>                 local row = `row' - 1
+>                 qui reg `var' t t2 in 1/`row'
+>                 local row = `row' + 1
+>         {c )-}               
+> */      predict residuals if date >= tq(`date'), res
+{txt} 12{com}.         foreach lead of num 0/4 {c -(}
+{txt} 13{com}.                 replace Output_gap_dt_t`lead' = 100*residuals[`row'+`lead'] if date == tq(`date')
+{txt} 14{com}.         {c )-}
+{txt} 15{com}.         drop log_var residuals
+{txt} 16{com}. {c )-}
+{txt}(1 real change made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(207 missing values generated)
+(287 missing values generated)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(206 missing values generated)
+(287 missing values generated)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(205 missing values generated)
+(287 missing values generated)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(204 missing values generated)
+(287 missing values generated)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(201 missing values generated)
+(285 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(202 missing values generated)
+(287 missing values generated)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(201 missing values generated)
+(287 missing values generated)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(199 missing values generated)
+(286 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(197 missing values generated)
+(285 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(197 missing values generated)
+(286 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(195 missing values generated)
+(285 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(193 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(193 missing values generated)
+(285 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(191 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(191 missing values generated)
+(285 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(189 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(189 missing values generated)
+(285 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(187 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(187 missing values generated)
+(285 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(185 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(185 missing values generated)
+(285 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(185 missing values generated)
+(286 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(182 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(181 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(181 missing values generated)
+(285 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(179 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(178 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(177 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(177 missing values generated)
+(285 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(175 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(174 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(173 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(172 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(171 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(170 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(169 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(168 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(167 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(166 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(165 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(164 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(163 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(162 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(161 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(160 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(159 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(158 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(157 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(156 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(155 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(154 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(153 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(152 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(151 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(150 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(149 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(148 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(147 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(146 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(145 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(144 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(143 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(142 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(141 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(140 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(139 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(138 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(137 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(136 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(135 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(134 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(133 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(132 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(131 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(130 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(129 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(128 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(127 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(126 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(125 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(124 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(123 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(122 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(121 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(120 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(119 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(118 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(117 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(116 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(115 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(114 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(113 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(112 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(111 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(110 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(109 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(108 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(107 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(106 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(105 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(152 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(151 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(150 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(149 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(100 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(99 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(98 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(97 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(96 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(95 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(94 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(93 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(92 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(91 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(90 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(89 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(138 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(137 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(136 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(135 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(134 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(83 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(82 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(81 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(80 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(79 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(78 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(77 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(76 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(75 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(74 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(121 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(120 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(71 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(70 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(69 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(68 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(67 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(66 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(65 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(64 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(63 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(62 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(61 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(60 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(59 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(58 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(57 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(56 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(55 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(54 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(53 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(52 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(51 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(50 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(49 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(48 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(47 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(46 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(45 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(44 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(43 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(42 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(41 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(40 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(39 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(38 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(37 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(36 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(35 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(34 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(33 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(32 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(31 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(30 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(29 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(28 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(27 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(26 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(25 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(24 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(23 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(22 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(21 missing values generated)
+(284 missing values generated)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(25 missing values generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(24 missing values generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(23 missing values generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(22 missing values generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(21 missing values generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(20 missing values generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(19 missing values generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(18 missing values generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(17 missing values generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(16 missing values generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(15 missing values generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(14 missing values generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(13 missing values generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(12 missing values generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(11 missing values generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(10 missing values generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(9 missing values generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(8 missing values generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(7 missing values generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(6 missing values generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(5 missing values generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(4 missing values generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(3 missing values generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(2 missing values generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(1 missing value generated)
+(289 missing values generated)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+
+{com}. 
+. drop Y* RGDP* t*
+{txt}
+{com}. keep if tin(1967q1,2012q4)
+{txt}(105 observations deleted)
+
+{com}. 
+. save "${c -(}path{c )-}/stata/data/tmp/Data_Output_gap_dt_pr.dta",replace
+{txt}file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/data/tmp/Data_Output_gap_dt_pr.dta saved
+
+{com}. 
+{txt}end of do-file
+
+{com}. do "${c -(}path{c )-}/stata/data/do/do_output_gap.do"
+{txt}
+{com}. * ==============================================================================
+. * 
+. * ==============================================================================
+. 
+. clear
+{txt}
+{com}. set more off
+{txt}
+{com}. set type double
+{txt}
+{com}. graph drop _all
+{txt}
+{com}. macro drop _all
+{txt}
+{com}. program drop _all
+{txt}
+{com}. 
+. * Defining a global for current path
+. if c(username) == "Narek" {c -(}
+.         global path "E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation"
+. {c )-}
+{txt}
+{com}. if c(username) == "apple" {c -(}
+.         global path "/Users/apple/Dropbox/Discretion_vs_Committment/RECENT VERSION"
+. {c )-}
+{txt}
+{com}. 
+. cd "${c -(}path{c )-}"
+{res}E:\Drive\my drive\private\research\rules-vs-discretion\files\estimation
+{txt}
+{com}. 
+. * ============================= Import GDP gap data ============================
+. 
+. import excel "${c -(}path{c )-}/stata/data/in/Greenbook_Output_Gap_Web.xlsx", sheet("Output Gap") cellrange(A3:U207) clear
+{res}{txt}
+{com}. 
+. drop A B
+{txt}
+{com}. replace C = "Date" in 1
+{txt}(1 real change made)
+
+{com}. 
+. * Rename the variables
+. foreach var of varlist _all {c -(}
+{txt}  2{com}.         replace `var' = subinstr(`var',"T","t",.) in 1
+{txt}  3{com}.         replace `var' = subinstr(`var',"-","_",.) in 1
+{txt}  4{com}.         replace `var' = subinstr(`var',"+","",.) in 1
+{txt}  5{com}.         local new_var_name = `var'[1]
+{txt}  6{com}.         rename `var' `new_var_name'
+{txt}  7{com}. {c )-}
+{txt}(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+{res}{txt}(1 real change made)
+(1 real change made)
+(0 real changes made)
+{res}{txt}(1 real change made)
+(1 real change made)
+(0 real changes made)
+{res}{txt}(1 real change made)
+(1 real change made)
+(0 real changes made)
+{res}{txt}(1 real change made)
+(1 real change made)
+(0 real changes made)
+{res}{txt}(1 real change made)
+(1 real change made)
+(0 real changes made)
+{res}{txt}(1 real change made)
+(1 real change made)
+(0 real changes made)
+{res}{txt}(1 real change made)
+(1 real change made)
+(0 real changes made)
+{res}{txt}(1 real change made)
+(1 real change made)
+(0 real changes made)
+{res}{txt}(1 real change made)
+(0 real changes made)
+(0 real changes made)
+{res}{txt}(1 real change made)
+(0 real changes made)
+(1 real change made)
+{res}{txt}(1 real change made)
+(0 real changes made)
+(1 real change made)
+{res}{txt}(1 real change made)
+(0 real changes made)
+(1 real change made)
+{res}{txt}(1 real change made)
+(0 real changes made)
+(1 real change made)
+{res}{txt}(1 real change made)
+(0 real changes made)
+(1 real change made)
+{res}{txt}(1 real change made)
+(0 real changes made)
+(1 real change made)
+{res}{txt}(1 real change made)
+(0 real changes made)
+(1 real change made)
+{res}{txt}(1 real change made)
+(0 real changes made)
+(1 real change made)
+{res}{txt}(1 real change made)
+(0 real changes made)
+(1 real change made)
+{res}{txt}
+{com}. drop in 1
+{txt}(1 observation deleted)
+
+{com}. destring t*, replace
+{txt}t_8: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(188 missing values generated)
+{res}{txt}t_7: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(186 missing values generated)
+{res}{txt}t_6: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(166 missing values generated)
+{res}{txt}t_5: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(119 missing values generated)
+{res}{txt}t_4: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(63 missing values generated)
+{res}{txt}t_3: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(20 missing values generated)
+{res}{txt}t_2: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(3 missing values generated)
+{res}{txt}t_1: all characters numeric; {res}replaced {txt}as {res}double
+{txt}t: all characters numeric; {res}replaced {txt}as {res}double
+{txt}t1: all characters numeric; {res}replaced {txt}as {res}double
+{txt}t2: all characters numeric; {res}replaced {txt}as {res}double
+{txt}t3: all characters numeric; {res}replaced {txt}as {res}double
+{txt}t4: all characters numeric; {res}replaced {txt}as {res}double
+{txt}t5: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(3 missing values generated)
+{res}{txt}t6: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(23 missing values generated)
+{res}{txt}t7: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(70 missing values generated)
+{res}{txt}t8: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(120 missing values generated)
+{res}{txt}t9: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(169 missing values generated)
+{res}{txt}
+{com}. 
+. * Generating Date from string dates
+. gen date = yq(real(substr(Date, 1,4)),real(substr(Date, -1,1)))
+{txt}
+{com}. 
+. * Get average projections by quarters
+. collapse (mean) t*, by(date)
+{txt}
+{com}. rename t* Output_gap_t*
+{res}{txt}
+{com}. tsset date, quarterly
+{res}{txt}{col 9}time variable:  {res}{col 25}date, 1987q3 to 2012q4
+{txt}{col 17}delta:  {res}1 quarter
+{txt}
+{com}. 
+. save "${c -(}path{c )-}/stata/data/tmp/Data_Output_gap_pr.dta",replace
+{txt}file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/data/tmp/Data_Output_gap_pr.dta saved
+
+{com}. 
+{txt}end of do-file
+
+{com}. do "${c -(}path{c )-}/stata/data/do/do_unrate.do"
+{txt}
+{com}. * ==============================================================================
+. * 
+. * ==============================================================================
+. 
+. clear
+{txt}
+{com}. set more off
+{txt}
+{com}. set type double
+{txt}
+{com}. graph drop _all
+{txt}
+{com}. macro drop _all
+{txt}
+{com}. program drop _all
+{txt}
+{com}. 
+. * Defining a global for current path
+. if c(username) == "Narek" {c -(}
+.         global path "E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation"
+. {c )-}
+{txt}
+{com}. if c(username) == "apple" {c -(}
+.         global path "/Users/apple/Dropbox/Discretion_vs_Committment/RECENT VERSION"
+. {c )-}
+{txt}
+{com}. 
+. cd "${c -(}path{c )-}"
+{res}E:\Drive\my drive\private\research\rules-vs-discretion\files\estimation
+{txt}
+{com}. 
+. * =============================== Import UR data ==============================
+. 
+. import delimited "${c -(}path{c )-}/stata/data/in/UNRATE.csv", clear
+{res}{text}(2 vars, 864 obs)
+
+{com}. * Generating date from date string
+. gen date_ = mdy(real(substr(date,6,2)),real(substr(date,9,2)),real(substr(date,1,4)))
+{txt}
+{com}. tsset date_, daily
+{res}{txt}{col 9}time variable:  {res}{col 25}date_, 01jan1948 to 01dec2019, but with gaps
+{txt}{col 17}delta:  {res}1 day
+{txt}
+{com}. gen quarter = qofd(date_)
+{txt}
+{com}. collapse (mean) unrate, by(quarter)
+{txt}
+{com}. rename quarter date
+{res}{txt}
+{com}. tsset date, quarterly
+{res}{txt}{col 9}time variable:  {res}{col 25}date, 1948q1 to 2019q4
+{txt}{col 17}delta:  {res}1 quarter
+{txt}
+{com}. 
+. save "${c -(}path{c )-}/stata/data/tmp/Data_UNRATE.dta",replace
+{txt}file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/data/tmp/Data_UNRATE.dta saved
+
+{com}. 
+{txt}end of do-file
+
+{com}. do "${c -(}path{c )-}/stata/data/do/do_reer.do"
+{txt}
+{com}. * ==============================================================================
+. * 
+. * ==============================================================================
+. 
+. clear
+{txt}
+{com}. set more off
+{txt}
+{com}. set type double
+{txt}
+{com}. graph drop _all
+{txt}
+{com}. macro drop _all
+{txt}
+{com}. program drop _all
+{txt}
+{com}. 
+. * Defining a global for current path
+. if c(username) == "Narek" {c -(}
+.         global path "E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation"
+. {c )-}
+{txt}
+{com}. if c(username) == "apple" {c -(}
+.         global path "/Users/apple/Dropbox/Discretion_vs_Committment/RECENT VERSION"
+. {c )-}
+{txt}
+{com}. 
+. cd "${c -(}path{c )-}"
+{res}E:\Drive\my drive\private\research\rules-vs-discretion\files\estimation
+{txt}
+{com}. 
+. * =============================== Import UR data ==============================
+. 
+. import delimited "${c -(}path{c )-}/stata/data/in/TWEXMPA.csv", clear
+{res}{text}(2 vars, 564 obs)
+
+{com}. * Generating date from date string
+. gen date_ = mdy(real(substr(date,6,2)),real(substr(date,9,2)),real(substr(date,1,4)))
+{txt}
+{com}. tsset date_, daily
+{res}{txt}{col 9}time variable:  {res}{col 25}date_, 01jan1973 to 01dec2019, but with gaps
+{txt}{col 17}delta:  {res}1 day
+{txt}
+{com}. gen quarter = qofd(date_)
+{txt}
+{com}. collapse (mean) twexmpa, by(quarter)
+{txt}
+{com}. rename quarter date
+{res}{txt}
+{com}. tsset date, quarterly
+{res}{txt}{col 9}time variable:  {res}{col 25}date, 1973q1 to 2019q4
+{txt}{col 17}delta:  {res}1 quarter
+{txt}
+{com}. 
+. gen ln_reer = ln(twexmpa)
+{txt}
+{com}. gen d_ln_reer = 100*d.ln_reer
+{txt}(1 missing value generated)
+
+{com}. 
+. save "${c -(}path{c )-}/stata/data/tmp/Data_REER.dta",replace
+{txt}file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/data/tmp/Data_REER.dta saved
+
+{com}. 
+{txt}end of do-file
+
+{com}. do "${c -(}path{c )-}/stata/data/do/do_gs1_gs5_gs10.do"
+{txt}
+{com}. * ==============================================================================
+. * 
+. * ==============================================================================
+. 
+. clear
+{txt}
+{com}. set more off
+{txt}
+{com}. set type double
+{txt}
+{com}. graph drop _all
+{txt}
+{com}. macro drop _all
+{txt}
+{com}. program drop _all
+{txt}
+{com}. 
+. * Defining a global for current path
+. if c(username) == "Narek" {c -(}
+.         global path "E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation"
+. {c )-}
+{txt}
+{com}. if c(username) == "apple" {c -(}
+.         global path "/Users/apple/Dropbox/Discretion_vs_Committment/RECENT VERSION"
+. {c )-}
+{txt}
+{com}. 
+. cd "${c -(}path{c )-}"
+{res}E:\Drive\my drive\private\research\rules-vs-discretion\files\estimation
+{txt}
+{com}. 
+. * =============================== Import GS1 data ==============================
+. 
+. import delimited "${c -(}path{c )-}/stata/data/in/GS1.csv", clear
+{res}{text}(2 vars, 801 obs)
+
+{com}. * Generating date from date string
+. gen date_ = mdy(real(substr(date,6,2)),real(substr(date,9,2)),real(substr(date,1,4)))
+{txt}
+{com}. tsset date_, daily
+{res}{txt}{col 9}time variable:  {res}{col 25}date_, 01apr1953 to 01dec2019, but with gaps
+{txt}{col 17}delta:  {res}1 day
+{txt}
+{com}. gen quarter = qofd(date_)
+{txt}
+{com}. collapse (mean) gs1, by(quarter)
+{txt}
+{com}. rename quarter date
+{res}{txt}
+{com}. tsset date, quarterly
+{res}{txt}{col 9}time variable:  {res}{col 25}date, 1953q2 to 2019q4
+{txt}{col 17}delta:  {res}1 quarter
+{txt}
+{com}. 
+. rename gs1 GS1
+{res}{txt}
+{com}. 
+. save "${c -(}path{c )-}/stata/data/tmp/Data_GS1.dta",replace
+{txt}file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/data/tmp/Data_GS1.dta saved
+
+{com}. 
+. * =============================== Import GS5 data ==============================
+. 
+. import delimited "${c -(}path{c )-}/stata/data/in/GS5.csv", clear
+{res}{text}(2 vars, 801 obs)
+
+{com}. * Generating date from date string
+. gen date_ = mdy(real(substr(date,6,2)),real(substr(date,9,2)),real(substr(date,1,4)))
+{txt}
+{com}. tsset date_, daily
+{res}{txt}{col 9}time variable:  {res}{col 25}date_, 01apr1953 to 01dec2019, but with gaps
+{txt}{col 17}delta:  {res}1 day
+{txt}
+{com}. gen quarter = qofd(date_)
+{txt}
+{com}. collapse (mean) gs5, by(quarter)
+{txt}
+{com}. rename quarter date
+{res}{txt}
+{com}. tsset date, quarterly
+{res}{txt}{col 9}time variable:  {res}{col 25}date, 1953q2 to 2019q4
+{txt}{col 17}delta:  {res}1 quarter
+{txt}
+{com}. 
+. rename gs5 GS5
+{res}{txt}
+{com}. 
+. save "${c -(}path{c )-}/stata/data/tmp/Data_GS5.dta",replace
+{txt}file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/data/tmp/Data_GS5.dta saved
+
+{com}. 
+. * =============================== Import GS10 data =============================
+. 
+. import delimited "${c -(}path{c )-}/stata/data/in/GS10.csv", clear
+{res}{text}(2 vars, 801 obs)
+
+{com}. * Generating date from date string
+. gen date_ = mdy(real(substr(date,6,2)),real(substr(date,9,2)),real(substr(date,1,4)))
+{txt}
+{com}. tsset date_, daily
+{res}{txt}{col 9}time variable:  {res}{col 25}date_, 01apr1953 to 01dec2019, but with gaps
+{txt}{col 17}delta:  {res}1 day
+{txt}
+{com}. gen quarter = qofd(date_)
+{txt}
+{com}. collapse (mean) gs10, by(quarter)
+{txt}
+{com}. rename quarter date
+{res}{txt}
+{com}. tsset date, quarterly
+{res}{txt}{col 9}time variable:  {res}{col 25}date, 1953q2 to 2019q4
+{txt}{col 17}delta:  {res}1 quarter
+{txt}
+{com}. 
+. rename gs10 GS10
+{res}{txt}
+{com}. 
+. save "${c -(}path{c )-}/stata/data/tmp/Data_GS10.dta",replace
+{txt}file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/data/tmp/Data_GS10.dta saved
+
+{com}. 
+{txt}end of do-file
+
+{com}. 
+. * =============================== Merge the data ===============================
+. 
+. use "${c -(}path{c )-}/stata/data/tmp/Data_FF.dta",clear
+{txt}
+{com}. 
+. merge 1:1 date using "${c -(}path{c )-}/stata/data/tmp/Data_VIX.dta", nogenerate
+{res}
+{txt}{col 5}Result{col 38}# of obs.
+{col 5}{hline 41}
+{col 5}not matched{col 30}{res}             143
+{txt}{col 9}from master{col 30}{res}             142{txt}  
+{col 9}from using{col 30}{res}               1{txt}  
+
+{col 5}matched{col 30}{res}             120{txt}  
+{col 5}{hline 41}
+
+{com}. merge 1:1 date using "${c -(}path{c )-}/stata/data/tmp/Data_VXO.dta", nogenerate
+{res}
+{txt}{col 5}Result{col 38}# of obs.
+{col 5}{hline 41}
+{col 5}not matched{col 30}{res}             126
+{txt}{col 9}from master{col 30}{res}             126{txt}  
+{col 9}from using{col 30}{res}               0{txt}  
+
+{col 5}matched{col 30}{res}             137{txt}  
+{col 5}{hline 41}
+
+{com}. merge 1:1 date using "${c -(}path{c )-}/stata/data/tmp/Data_PGDP_pr.dta", nogenerate
+{res}
+{txt}{col 5}Result{col 38}# of obs.
+{col 5}{hline 41}
+{col 5}not matched{col 30}{res}              79
+{txt}{col 9}from master{col 30}{res}              79{txt}  
+{col 9}from using{col 30}{res}               0{txt}  
+
+{col 5}matched{col 30}{res}             184{txt}  
+{col 5}{hline 41}
+
+{com}. merge 1:1 date using "${c -(}path{c )-}/stata/data/tmp/Data_PCPI_pr.dta", nogenerate
+{res}
+{txt}{col 5}Result{col 38}# of obs.
+{col 5}{hline 41}
+{col 5}not matched{col 30}{res}             130
+{txt}{col 9}from master{col 30}{res}             130{txt}  
+{col 9}from using{col 30}{res}               0{txt}  
+
+{col 5}matched{col 30}{res}             133{txt}  
+{col 5}{hline 41}
+
+{com}. merge 1:1 date using "${c -(}path{c )-}/stata/data/tmp/Data_PCPIX_pr.dta", nogenerate
+{res}
+{txt}{col 5}Result{col 38}# of obs.
+{col 5}{hline 41}
+{col 5}not matched{col 30}{res}             155
+{txt}{col 9}from master{col 30}{res}             155{txt}  
+{col 9}from using{col 30}{res}               0{txt}  
+
+{col 5}matched{col 30}{res}             108{txt}  
+{col 5}{hline 41}
+
+{com}. merge 1:1 date using "${c -(}path{c )-}/stata/data/tmp/Data_RGDP_pr.dta", nogenerate
+{res}
+{txt}{col 5}Result{col 38}# of obs.
+{col 5}{hline 41}
+{col 5}not matched{col 30}{res}              79
+{txt}{col 9}from master{col 30}{res}              79{txt}  
+{col 9}from using{col 30}{res}               0{txt}  
+
+{col 5}matched{col 30}{res}             184{txt}  
+{col 5}{hline 41}
+
+{com}. merge 1:1 date using "${c -(}path{c )-}/stata/data/tmp/Data_Output_gap_dt_pr.dta", nogenerate
+{res}
+{txt}{col 5}Result{col 38}# of obs.
+{col 5}{hline 41}
+{col 5}not matched{col 30}{res}              79
+{txt}{col 9}from master{col 30}{res}              79{txt}  
+{col 9}from using{col 30}{res}               0{txt}  
+
+{col 5}matched{col 30}{res}             184{txt}  
+{col 5}{hline 41}
+
+{com}. merge 1:1 date using "${c -(}path{c )-}/stata/data/tmp/Data_Output_gap_pr.dta", nogenerate
+{res}
+{txt}{col 5}Result{col 38}# of obs.
+{col 5}{hline 41}
+{col 5}not matched{col 30}{res}             161
+{txt}{col 9}from master{col 30}{res}             161{txt}  
+{col 9}from using{col 30}{res}               0{txt}  
+
+{col 5}matched{col 30}{res}             102{txt}  
+{col 5}{hline 41}
+
+{com}. merge 1:1 date using "${c -(}path{c )-}/stata/data/tmp/Data_UNRATE.dta", nogenerate
+{res}
+{txt}{col 5}Result{col 38}# of obs.
+{col 5}{hline 41}
+{col 5}not matched{col 30}{res}              27
+{txt}{col 9}from master{col 30}{res}               1{txt}  
+{col 9}from using{col 30}{res}              26{txt}  
+
+{col 5}matched{col 30}{res}             262{txt}  
+{col 5}{hline 41}
+
+{com}. merge 1:1 date using "${c -(}path{c )-}/stata/data/tmp/Data_REER.dta", nogenerate
+{res}
+{txt}{col 5}Result{col 38}# of obs.
+{col 5}{hline 41}
+{col 5}not matched{col 30}{res}             101
+{txt}{col 9}from master{col 30}{res}             101{txt}  
+{col 9}from using{col 30}{res}               0{txt}  
+
+{col 5}matched{col 30}{res}             188{txt}  
+{col 5}{hline 41}
+
+{com}. merge 1:1 date using "${c -(}path{c )-}/stata/data/tmp/Data_GS1.dta", nogenerate
+{res}
+{txt}{col 5}Result{col 38}# of obs.
+{col 5}{hline 41}
+{col 5}not matched{col 30}{res}              22
+{txt}{col 9}from master{col 30}{res}              22{txt}  
+{col 9}from using{col 30}{res}               0{txt}  
+
+{col 5}matched{col 30}{res}             267{txt}  
+{col 5}{hline 41}
+
+{com}. merge 1:1 date using "${c -(}path{c )-}/stata/data/tmp/Data_GS5.dta", nogenerate
+{res}
+{txt}{col 5}Result{col 38}# of obs.
+{col 5}{hline 41}
+{col 5}not matched{col 30}{res}              22
+{txt}{col 9}from master{col 30}{res}              22{txt}  
+{col 9}from using{col 30}{res}               0{txt}  
+
+{col 5}matched{col 30}{res}             267{txt}  
+{col 5}{hline 41}
+
+{com}. merge 1:1 date using "${c -(}path{c )-}/stata/data/tmp/Data_GS10.dta", nogenerate
+{res}
+{txt}{col 5}Result{col 38}# of obs.
+{col 5}{hline 41}
+{col 5}not matched{col 30}{res}              22
+{txt}{col 9}from master{col 30}{res}              22{txt}  
+{col 9}from using{col 30}{res}               0{txt}  
+
+{col 5}matched{col 30}{res}             267{txt}  
+{col 5}{hline 41}
+
+{com}. 
+. * ========================== Generating some variables =========================
+. 
+. gen GSslope = GS10 - GS1
+{txt}(22 missing values generated)
+
+{com}. 
+. foreach a in "t_4" "t_3" "t_2" "t_1" "t" "t1" "t2" "t3" "t4" {c -(}
+{txt}  2{com}. 
+. gen CS_`a' = PCPI_`a' - PCPIX_`a'
+{txt}  3{com}. 
+. {c )-}
+{txt}(199 missing values generated)
+(186 missing values generated)
+(181 missing values generated)
+(181 missing values generated)
+(181 missing values generated)
+(181 missing values generated)
+(181 missing values generated)
+(181 missing values generated)
+(181 missing values generated)
+
+{com}. 
+. * ====================== Organizing and formatting the data ====================
+. 
+. order date, first
+{txt}
+{com}. 
+. tsset date, quarterly
+{res}{txt}{col 9}time variable:  {res}{col 25}date, 1948q1 to 2020q1
+{txt}{col 17}delta:  {res}1 quarter
+{txt}
+{com}. 
+. * Labeling the data
+. do "${c -(}path{c )-}/stata/data/do/labels.do"
+{txt}
+{com}. label var FF_A "Fed funds rate t"
+{txt}
+{com}. label var FF_E "Fed funds rate t"
+{txt}
+{com}. 
+. label var VIX "VIX volatility index t"
+{txt}
+{com}. label var VXO "VXO volatility index t"
+{txt}
+{com}. 
+. label var PGDP_t_4 "Deflator t-4"
+{txt}
+{com}. label var PGDP_t_3 "Deflator t-3"
+{txt}
+{com}. label var PGDP_t_2 "Deflator t-2"
+{txt}
+{com}. label var PGDP_t_1 "Deflator t-1"
+{txt}
+{com}. label var PGDP_t   "Deflator t"
+{txt}
+{com}. label var PGDP_t1  "Deflator t+1"
+{txt}
+{com}. label var PGDP_t2  "Deflator t+2"
+{txt}
+{com}. label var PGDP_t3  "Deflator t+3"
+{txt}
+{com}. label var PGDP_t4  "Deflator t+4"
+{txt}
+{com}. 
+. label var PCPI_t_4 "Inflation t-4"
+{txt}
+{com}. label var PCPI_t_3 "Inflation t-3"
+{txt}
+{com}. label var PCPI_t_2 "Inflation t-2"
+{txt}
+{com}. label var PCPI_t_1 "Inflation t-1"
+{txt}
+{com}. label var PCPI_t   "Inflation t"
+{txt}
+{com}. label var PCPI_t1  "Inflation t+1"
+{txt}
+{com}. label var PCPI_t2  "Inflation t+2"
+{txt}
+{com}. label var PCPI_t3  "Inflation t+3"
+{txt}
+{com}. label var PCPI_t4  "Inflation t+4"
+{txt}
+{com}. 
+. label var PCPIX_t_4 "Core inflation t-4"
+{txt}
+{com}. label var PCPIX_t_3 "Core inflation t-3"
+{txt}
+{com}. label var PCPIX_t_2 "Core inflation t-2"
+{txt}
+{com}. label var PCPIX_t_1 "Core inflation t-1"
+{txt}
+{com}. label var PCPIX_t   "Core inflation t"
+{txt}
+{com}. label var PCPIX_t1  "Core inflation t+1"
+{txt}
+{com}. label var PCPIX_t2  "Core inflation t+2"
+{txt}
+{com}. label var PCPIX_t3  "Core inflation t+3"
+{txt}
+{com}. label var PCPIX_t4  "Core inflation t+4"
+{txt}
+{com}. 
+. label var RGDP_t_4 "Output growth t-4"
+{txt}
+{com}. label var RGDP_t_3 "Output growth t-3"
+{txt}
+{com}. label var RGDP_t_2 "Output growth t-2"
+{txt}
+{com}. label var RGDP_t_1 "Output growth t-1"
+{txt}
+{com}. label var RGDP_t   "Output growth t"
+{txt}
+{com}. label var RGDP_t1  "Output growth t+1"
+{txt}
+{com}. label var RGDP_t2  "Output growth t+2"
+{txt}
+{com}. label var RGDP_t3  "Output growth t+3"
+{txt}
+{com}. label var RGDP_t4  "Output growth t+4"
+{txt}
+{com}. 
+. label var Output_gap_dt_t0  "Output gap detrended t"
+{txt}
+{com}. label var Output_gap_dt_t1  "Output gap detrended t+1"
+{txt}
+{com}. label var Output_gap_dt_t2  "Output gap detrended t+2"
+{txt}
+{com}. label var Output_gap_dt_t3  "Output gap detrended t+3"
+{txt}
+{com}. label var Output_gap_dt_t4  "Output gap detrended t+4"
+{txt}
+{com}. 
+. label var Output_gap_t_8 "Output gap t-8"
+{txt}
+{com}. label var Output_gap_t_7 "Output gap t-7"
+{txt}
+{com}. label var Output_gap_t_6 "Output gap t-6"
+{txt}
+{com}. label var Output_gap_t_5 "Output gap t-5"
+{txt}
+{com}. label var Output_gap_t_4 "Output gap t-4"
+{txt}
+{com}. label var Output_gap_t_3 "Output gap t-3"
+{txt}
+{com}. label var Output_gap_t_2 "Output gap t-2"
+{txt}
+{com}. label var Output_gap_t_1 "Output gap t-1"
+{txt}
+{com}. label var Output_gap_t   "Output gap t"
+{txt}
+{com}. label var Output_gap_t1  "Output gap t+1"
+{txt}
+{com}. label var Output_gap_t2  "Output gap t+2"
+{txt}
+{com}. label var Output_gap_t3  "Output gap t+3"
+{txt}
+{com}. label var Output_gap_t4  "Output gap t+4"
+{txt}
+{com}. label var Output_gap_t5  "Output gap t+5"
+{txt}
+{com}. label var Output_gap_t6  "Output gap t+6"
+{txt}
+{com}. label var Output_gap_t7  "Output gap t+7"
+{txt}
+{com}. label var Output_gap_t8  "Output gap t+8"
+{txt}
+{com}. label var Output_gap_t9  "Output gap t+9"
+{txt}
+{com}. 
+. label var CS_t_4 "Cost-push shock t-4"
+{txt}
+{com}. label var CS_t_3 "Cost-push shock t-3"
+{txt}
+{com}. label var CS_t_2 "Cost-push shock t-2"
+{txt}
+{com}. label var CS_t_1 "Cost-push shock t-1"
+{txt}
+{com}. label var CS_t   "Cost-push shock t"
+{txt}
+{com}. label var CS_t1  "Cost-push shock t+1"
+{txt}
+{com}. label var CS_t2  "Cost-push shock t+2"
+{txt}
+{com}. label var CS_t3  "Cost-push shock t+3"
+{txt}
+{com}. label var CS_t4  "Cost-push shock t+4"
+{txt}
+{com}. 
+. label var unrate    "Unemployment rate"
+{txt}
+{com}. label var twexmpa       "REER"
+{txt}
+{com}. label var ln_reer   "Log REER"
+{txt}
+{com}. label var d_ln_reer "D Log REER"
+{txt}
+{com}. label var GS1       "1-year yield"
+{txt}
+{com}. label var GS5       "5-year yield"
+{txt}
+{com}. label var GS10      "10-year yield"
+{txt}
+{com}. label var GSslope   "Term structure slope"
+{txt}
+{com}. 
+{txt}end of do-file
+
+{com}. 
+. * Displaying all variables except Date
+. ds date, not
+{txt}{col 1}FF_E{col 15}PGDP_t2{col 29}PCPI_t3{col 43}PCPIX_t4{col 57}Output_gap~0{col 71}Output_ga~_3{col 85}Output_ga~t7{col 99}GSslope
+{col 1}FF_A{col 15}PGDP_t3{col 29}PCPI_t4{col 43}RGDP_t_4{col 57}Output_~t_t1{col 71}Output_ga~_2{col 85}Output_ga~t8{col 99}CS_t_4
+{col 1}VIX{col 15}PGDP_t4{col 29}PCPIX_t_4{col 43}RGDP_t_3{col 57}Output_~t_t2{col 71}Output_ga~_1{col 85}Output_gap~9{col 99}CS_t_3
+{col 1}VXO{col 15}PCPI_t_4{col 29}PCPIX_t_3{col 43}RGDP_t_2{col 57}Output_~t_t3{col 71}Output_gap_t{col 85}unrate{col 99}CS_t_2
+{col 1}PGDP_t_4{col 15}PCPI_t_3{col 29}PCPIX_t_2{col 43}RGDP_t_1{col 57}Output_~t_t4{col 71}Output_~p_t1{col 85}twexmpa{col 99}CS_t_1
+{col 1}PGDP_t_3{col 15}PCPI_t_2{col 29}PCPIX_t_1{col 43}RGDP_t{col 57}Output_ga~_8{col 71}Output_~p_t2{col 85}ln_reer{col 99}CS_t
+{col 1}PGDP_t_2{col 15}PCPI_t_1{col 29}PCPIX_t{col 43}RGDP_t1{col 57}Output_ga~_7{col 71}Output_~p_t3{col 85}d_ln_reer{col 99}CS_t1
+{col 1}PGDP_t_1{col 15}PCPI_t{col 29}PCPIX_t1{col 43}RGDP_t2{col 57}Output_ga~_6{col 71}Output_~p_t4{col 85}GS1{col 99}CS_t2
+{col 1}PGDP_t{col 15}PCPI_t1{col 29}PCPIX_t2{col 43}RGDP_t3{col 57}Output_ga~_5{col 71}Output_ga~t5{col 85}GS5{col 99}CS_t3
+{col 1}PGDP_t1{col 15}PCPI_t2{col 29}PCPIX_t3{col 43}RGDP_t4{col 57}Output_ga~_4{col 71}Output_ga~t6{col 85}GS10{col 99}CS_t4
+
+{com}. global vars `r(varlist)'
+{txt}
+{com}. recast double $vars
+{txt}
+{com}. format %10.2f $vars
+{txt}
+{com}. 
+. * Keeping only the observations for which projections are available
+. * keep if date>=tq(1985q1)
+. 
+. * =============================== Saving the data ==============================
+. 
+. save "${c -(}path{c )-}/stata/data/out/Data.dta", replace
+{txt}file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/data/out/Data.dta saved
+
+{com}. saveold "${c -(}path{c )-}/stata/data/out/Data_v13.dta", replace version(13)
+{txt}(saving in Stata 13 format)
+file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/data/out/Data_v13.dta saved
+
+{com}. 
+. export excel using "${c -(}path{c )-}/stata/data/out/Data.xlsx", sheet("data") firstrow(variables) replace
+{res}{txt}file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/data/out/Data.xlsx saved
+
+{com}. 
+. * ==============================================================================
+. 
+. log close
+      {txt}name:  {res}<unnamed>
+       {txt}log:  {res}E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/log/do_data  8 May 2020.smcl
+  {txt}log type:  {res}smcl
+ {txt}closed on:  {res} 8 May 2020, 21:27:46
+{txt}{.-}
+{smcl}
+{txt}{sf}{ul off}

@@ -1,0 +1,242 @@
+{smcl}
+{txt}{sf}{ul off}{.-}
+      name:  {res}<unnamed>
+       {txt}log:  {res}E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/log/do_model_rolling  8 May 2020.smcl
+  {txt}log type:  {res}smcl
+ {txt}opened on:  {res} 8 May 2020, 20:28:13
+{txt}
+{com}. 
+. * Defining a global for Greenspan's period
+. global Greenspan "date>=tq(1987q3) & date<=tq(2005q4)"
+{txt}
+{com}. 
+. * Defining a variance estimation method
+. global vce vce(robust)
+{txt}
+{com}. 
+. cd "${c -(}path{c )-}/stata/"
+{res}E:\Drive\my drive\private\research\rules-vs-discretion\files\estimation\stata
+{txt}
+{com}. 
+. * ==============================================================================
+. 
+. use "${c -(}path{c )-}/stata/data/out/Data.dta",clear
+{txt}
+{com}. 
+. * Replacig missing VIX with VXO (uses old methodology)
+. replace VIX = VXO if missing(VIX)
+{txt}(16 real changes made)
+
+{com}. 
+. * ================================== Greenspan =================================
+. 
+. arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 if ${c -(}Greenspan{c )-}, het(PCPI_t1 PCPIX_t1 Output_gap_t1 L.VIX) ${c -(}vce{c )-} 
+
+{txt}(setting optimization to BHHH)
+Iteration 0:{col 16}log pseudolikelihood = {res} 7.1383069{txt}  
+Iteration 1:{col 16}log pseudolikelihood = {res} 9.8094812{txt}  
+Iteration 2:{col 16}log pseudolikelihood = {res} 10.491928{txt}  
+Iteration 3:{col 16}log pseudolikelihood = {res}  10.69274{txt}  
+Iteration 4:{col 16}log pseudolikelihood = {res} 10.755057{txt}  
+(switching optimization to BFGS)
+Iteration 5:{col 16}log pseudolikelihood = {res} 10.779123{txt}  
+Iteration 6:{col 16}log pseudolikelihood = {res} 10.797059{txt}  
+Iteration 7:{col 16}log pseudolikelihood = {res} 10.798355{txt}  
+Iteration 8:{col 16}log pseudolikelihood = {res} 10.799324{txt}  
+Iteration 9:{col 16}log pseudolikelihood = {res} 10.799495{txt}  
+Iteration 10:{col 16}log pseudolikelihood = {res}  10.79952{txt}  
+Iteration 11:{col 16}log pseudolikelihood = {res} 10.799522{txt}  
+Iteration 12:{col 16}log pseudolikelihood = {res} 10.799522{txt}  
+{res}
+{txt}Time-series regression -- multiplicative heteroskedasticity
+
+Sample: {res}1987q3 - 2005q4                           {txt}Number of obs   = {res}        74
+{txt}Distribution: {res}Gaussian                            {txt}Wald chi2({res}4{txt})    =  {res}  8637.15
+{txt}Log pseudolikelihood = {res} 10.79952                  {txt}Prob > chi2     =     {res}0.0000
+
+{txt}{hline 14}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{col 15}{c |}{col 27}  Semirobust
+{col 1}         FF_A{col 15}{c |}      Coef.{col 27}   Std. Err.{col 39}      z{col 47}   P>|z|{col 55}     [95% Con{col 68}f. Interval]
+{hline 14}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{res}FF_A          {txt}{c |}
+{space 9}FF_A {c |}
+{space 10}L1. {c |}{col 15}{res}{space 2} 1.282582{col 27}{space 2} .0542084{col 38}{space 1}   23.66{col 47}{space 3}0.000{col 55}{space 4} 1.176336{col 68}{space 3} 1.388829
+{txt}{space 10}L2. {c |}{col 15}{res}{space 2}-.4828518{col 27}{space 2} .0440552{col 38}{space 1}  -10.96{col 47}{space 3}0.000{col 55}{space 4}-.5691983{col 68}{space 3}-.3965052
+{txt}{space 13} {c |}
+{space 5}PCPIX_t1 {c |}{col 15}{res}{space 2} .3535553{col 27}{space 2} .0553585{col 38}{space 1}    6.39{col 47}{space 3}0.000{col 55}{space 4} .2450546{col 68}{space 3} .4620559
+{txt}Output_gap_t1 {c |}{col 15}{res}{space 2} .1544607{col 27}{space 2} .0199218{col 38}{space 1}    7.75{col 47}{space 3}0.000{col 55}{space 4} .1154146{col 68}{space 3} .1935068
+{txt}{space 8}_cons {c |}{col 15}{res}{space 2}-.0143887{col 27}{space 2} .0773831{col 38}{space 1}   -0.19{col 47}{space 3}0.852{col 55}{space 4}-.1660568{col 68}{space 3} .1372795
+{txt}{hline 14}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{res}HET           {txt}{c |}
+{space 6}PCPI_t1 {c |}{col 15}{res}{space 2}-.8341673{col 27}{space 2} .3552321{col 38}{space 1}   -2.35{col 47}{space 3}0.019{col 55}{space 4} -1.53041{col 68}{space 3}-.1379251
+{txt}{space 5}PCPIX_t1 {c |}{col 15}{res}{space 2} 1.222635{col 27}{space 2} .4194417{col 38}{space 1}    2.91{col 47}{space 3}0.004{col 55}{space 4} .4005443{col 68}{space 3} 2.044726
+{txt}Output_gap_t1 {c |}{col 15}{res}{space 2}-.1288311{col 27}{space 2} .0877199{col 38}{space 1}   -1.47{col 47}{space 3}0.142{col 55}{space 4}-.3007589{col 68}{space 3} .0430967
+{txt}{space 13} {c |}
+{space 10}VIX {c |}
+{space 10}L1. {c |}{col 15}{res}{space 2} .0728782{col 27}{space 2} .0356587{col 38}{space 1}    2.04{col 47}{space 3}0.041{col 55}{space 4} .0029885{col 68}{space 3} .1427679
+{txt}{space 13} {c |}
+{space 8}_cons {c |}{col 15}{res}{space 2}-5.996619{col 27}{space 2} .8976694{col 38}{space 1}   -6.68{col 47}{space 3}0.000{col 55}{space 4}-7.756019{col 68}{space 3} -4.23722
+{txt}{hline 14}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+
+{com}. 
+. rolling _b _se, window(40) saving("${c -(}path{c )-}/stata/data/tmp/estimation_rolling.dta",replace): ///
+> arch FF_A l(1/2).FF_A PCPIX_t1 Output_gap_t1 if ${c -(}Greenspan{c )-}, het(PCPI_t1 PCPIX_t1 Output_gap_t1 L.VIX) ${c -(}vce{c )-}
+{txt}(running arch on estimation sample)
+(note: file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/data/tmp/estimation_rolling.dta not found)
+
+Rolling replications ({res}35{txt})
+{hline 4}{c +}{hline 3} 1 {hline 3}{c +}{hline 3} 2 {hline 3}{c +}{hline 3} 3 {hline 3}{c +}{hline 3} 4 {hline 3}{c +}{hline 3} 5 
+...................................
+file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/data/tmp/estimation_rolling.dta saved
+
+{com}. 
+. * ==============================================================================
+. 
+. *preserve
+. 
+. use "${c -(}path{c )-}/stata/data/tmp/estimation_rolling.dta", clear
+{txt}(rolling: arch)
+
+{com}. gen date = round((start+end)/2)
+{txt}
+{com}. tsset date, quarterly
+{res}{txt}{col 9}time variable:  {res}{col 25}date, 1992q3 to 2001q1
+{txt}{col 17}delta:  {res}1 quarter
+{txt}
+{com}. 
+. rename _stat_1 FF_A_b_AR1
+{res}{txt}
+{com}. rename _stat_2 FF_A_b_AR2
+{res}{txt}
+{com}. rename _stat_9 HET_b_VIX
+{res}{txt}
+{com}. rename _stat_11 FF_A_se_AR1
+{res}{txt}
+{com}. rename _stat_12 FF_A_se_AR2
+{res}{txt}
+{com}. rename _stat_19 HET_se_VIX 
+{res}{txt}
+{com}. 
+. gen FF_A_b_AR = FF_A_b_AR1 + FF_A_b_AR2
+{txt}
+{com}. 
+. label var FF_A_b_AR "Fed funds rate"
+{txt}
+{com}. label var FF_A_b_AR1 "Fed funds rate t-1"
+{txt}
+{com}. label var FF_A_b_AR2 "Fed funds rate t-2"
+{txt}
+{com}. label var FF_A_b_PCPIX_t1 "Core inflation"
+{txt}
+{com}. label var FF_A_b_Output_gap_t1 "Output gap"
+{txt}
+{com}. label var HET_b_PCPI_t1 "Headline inflation"
+{txt}
+{com}. label var HET_b_PCPIX_t1 "Core inflation"
+{txt}
+{com}. label var HET_b_Output_gap_t1 "Output gap"
+{txt}
+{com}. label var HET_b_VIX "VIX"
+{txt}
+{com}. 
+. label var FF_A_se_AR1 "SE Fed funds rate t-1"
+{txt}
+{com}. label var FF_A_se_AR2 "SE Fed funds rate t-2"
+{txt}
+{com}. label var FF_A_se_PCPIX_t1 "SE Core inflation"
+{txt}
+{com}. label var FF_A_se_Output_gap_t1 "SE Output gap"
+{txt}
+{com}. label var HET_se_PCPI_t1 "SE Headline inflation"
+{txt}
+{com}. label var HET_se_PCPIX_t1 "SE Core inflation"
+{txt}
+{com}. label var HET_se_Output_gap_t1 "SE Output gap"
+{txt}
+{com}. label var HET_se_VIX "SE VIX"
+{txt}
+{com}. 
+. replace FF_A_b_PCPIX_t1 = FF_A_b_PCPIX_t1 / ( 1 - FF_A_b_AR)
+{txt}(35 real changes made)
+
+{com}. replace FF_A_b_Output_gap_t1 = FF_A_b_Output_gap_t1 / ( 1 - FF_A_b_AR)
+{txt}(35 real changes made)
+
+{com}. 
+. * -------------------------------- Mean equation -------------------------------
+. 
+. twoway (tsline FF_A_b_AR , lcolor(navy) lwidth(thick) yscale(range(0 1.1) titlegap(3)) yline(0)), ttitle("") tlabel(, labsize(vlarge) format(%tqCY)) tmtick(##5) ytitle({c -(}&rho{c )-}, size(huge) orientation(horizontal)) ylabel(#4, angle(vertical) labsize(vlarge)) /*title("`: var label FF_A_b_AR'")*/ legend(off) scheme(s1mono) name(FF_A_b_AR,replace) //  
+{res}{txt}
+{com}. graph export "${c -(}path{c )-}/stata/figure/rolling_m_b_AR.pdf", as(pdf) replace
+{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/rolling_m_b_AR.pdf written in PDF format)
+
+{com}. graph export "${c -(}path{c )-}/stata/figure/rolling_m_b_AR.eps", as(eps) preview(on) replace
+{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/rolling_m_b_AR.eps written in EPS format)
+
+{com}. 
+. twoway (tsline FF_A_b_PCPIX_t1, lcolor(navy) lwidth(thick) yscale(range(0 2.1) titlegap(3)) yline(0)), ttitle("") tlabel(, labsize(vlarge) format(%tqCY)) tmtick(##5) ytitle({c -(}&phi{c )-}{c -(}sub:{c -(}&pi{c )-}{c )-}, size(huge) orientation(horizontal)) ylabel(#4, angle(vertical) labsize(vlarge)) /*title("`: var label FF_A_b_PCPIX_t1'")*/ legend(off) scheme(s1mono) name(FF_A_b_PCPIX_t1,replace) // yline(0) 
+{res}{txt}
+{com}. graph export "${c -(}path{c )-}/stata/figure/rolling_m_b_PCPIX_t1.pdf", as(pdf) replace
+{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/rolling_m_b_PCPIX_t1.pdf written in PDF format)
+
+{com}. graph export "${c -(}path{c )-}/stata/figure/rolling_m_b_PCPIX_t1.eps", as(eps) preview(on) replace
+{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/rolling_m_b_PCPIX_t1.eps written in EPS format)
+
+{com}. 
+. twoway (tsline FF_A_b_Output_gap_t1, lcolor(navy) lwidth(thick) yscale(range(0 1.1) titlegap(3)) yline(0)), ttitle("") tlabel(, labsize(vlarge) format(%tqCY)) tmtick(##5) ytitle({c -(}&phi{c )-}{c -(}sub:x{c )-}, size(huge) orientation(horizontal)) ylabel(#4, angle(vertical) labsize(vlarge)) /*title("`: var label FF_A_b_Output_gap_t1'")*/ legend(off) scheme(s1mono) name(FF_A_b_Output_gap_t1,replace) // yline(0) 
+{res}{txt}
+{com}. graph export "${c -(}path{c )-}/stata/figure/rolling_m_b_Output_gap_t1.pdf", as(pdf) replace
+{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/rolling_m_b_Output_gap_t1.pdf written in PDF format)
+
+{com}. graph export "${c -(}path{c )-}/stata/figure/rolling_m_b_Output_gap_t1.eps", as(eps) preview(on) replace
+{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/rolling_m_b_Output_gap_t1.eps written in EPS format)
+
+{com}. 
+. * ------------------------------ Variance equation -----------------------------
+. 
+. twoway (tsline HET_b_PCPI_t1, lcolor(navy) lwidth(thick)), yscale(titlegap(3)) ttitle("") tlabel(, labsize(vlarge) format(%tqCY)) tmtick(##5) yline(0) ytitle({c -(}&delta{c )-}{c -(}sub:{c -(}&pi{c )-}{c )-}{c -(}sup:{c -(}h{c )-}{c )-}, size(huge) orientation(horizontal)) ylabel(#4, angle(vertical) labsize(vlarge)) /* title("`: var label HET_b_PCPI_t1'") */ legend(off) scheme(s1mono) name(HET_b_PCPI_t1,replace) // yline(0) 
+{res}{txt}
+{com}. graph export "${c -(}path{c )-}/stata/figure/rolling_v_b_PCPI_t1.pdf", as(pdf) replace
+{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/rolling_v_b_PCPI_t1.pdf written in PDF format)
+
+{com}. graph export "${c -(}path{c )-}/stata/figure/rolling_v_b_PCPI_t1.eps", as(eps) preview(on) replace
+{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/rolling_v_b_PCPI_t1.eps written in EPS format)
+
+{com}. 
+. twoway (tsline HET_b_PCPIX_t1, lcolor(navy) lwidth(thick)), yscale(titlegap(3)) ttitle("") tlabel(, labsize(vlarge) format(%tqCY)) tmtick(##5) tmtick(##5) yline(0) ytitle({c -(}&delta{c )-}{c -(}sub:{c -(}&pi{c )-}{c )-}{c -(}sup:{c -(}c{c )-}{c )-}, size(huge) orientation(horizontal)) ylabel(#4, angle(vertical) labsize(vlarge)) /* title("`: var label HET_b_PCPIX_t1'") */ legend(off) scheme(s1mono) name(HET_b_PCPIX_t1,replace) // yline(0) 
+{res}{txt}
+{com}. graph export "${c -(}path{c )-}/stata/figure/rolling_v_b_PCPIX_t1.pdf", as(pdf) replace
+{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/rolling_v_b_PCPIX_t1.pdf written in PDF format)
+
+{com}. graph export "${c -(}path{c )-}/stata/figure/rolling_v_b_PCPIX_t1.eps", as(eps) preview(on) replace
+{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/rolling_v_b_PCPIX_t1.eps written in EPS format)
+
+{com}. 
+. twoway (tsline HET_b_Output_gap_t1, lcolor(navy) lwidth(thick)), yscale(titlegap(3)) ttitle("") tlabel(, labsize(vlarge) format(%tqCY)) tmtick(##5) yline(0) ytitle({c -(}&delta{c )-}{c -(}sub:x{c )-}, size(huge) orientation(horizontal)) ylabel(#4, angle(vertical) labsize(vlarge)) /* title("`: var label HET_b_Output_gap_t1'") */ legend(off) scheme(s1mono) name(HET_b_Output_gap_t1,replace) // yline(0) 
+{res}{txt}
+{com}. graph export "${c -(}path{c )-}/stata/figure/rolling_v_b_Output_gap_t1.pdf", as(pdf) replace
+{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/rolling_v_b_Output_gap_t1.pdf written in PDF format)
+
+{com}. graph export "${c -(}path{c )-}/stata/figure/rolling_v_b_Output_gap_t1.eps", as(eps) preview(on) replace
+{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/rolling_v_b_Output_gap_t1.eps written in EPS format)
+
+{com}. 
+. twoway (tsline HET_b_VIX, lcolor(navy) lwidth(thick)), yscale(titlegap(3)) ttitle("") tlabel(, labsize(vlarge) format(%tqCY)) tmtick(##5) yline(0) ytitle({c -(}&delta{c )-}{c -(}sub:v{c )-}, size(huge) orientation(horizontal)) ylabel(#4, angle(vertical) labsize(vlarge)) /* title("`: var label HET_b_VIX'") */ legend(off) scheme(s1mono) name(HET_b_VIX,replace) // yline(0) 
+{res}{txt}
+{com}. graph export "${c -(}path{c )-}/stata/figure/rolling_v_b_VIX.pdf", as(pdf) replace
+{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/rolling_v_b_VIX.pdf written in PDF format)
+
+{com}. graph export "${c -(}path{c )-}/stata/figure/rolling_v_b_VIX.eps", as(eps) preview(on) replace
+{txt}(file E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/figure/rolling_v_b_VIX.eps written in EPS format)
+
+{com}. 
+. * ==============================================================================
+. 
+. log close
+      {txt}name:  {res}<unnamed>
+       {txt}log:  {res}E:/Drive/my drive/private/research/rules-vs-discretion/files/estimation/stata/log/do_model_rolling  8 May 2020.smcl
+  {txt}log type:  {res}smcl
+ {txt}closed on:  {res} 8 May 2020, 20:29:38
+{txt}{.-}
+{smcl}
+{txt}{sf}{ul off}

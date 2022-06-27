@@ -1,0 +1,9 @@
+Fed Funds Rate:		https://fred.stlouisfed.org/series/fedfunds
+Real exchange rate:	https://fred.stlouisfed.org/series/TWEXMPA
+S&P500:			https://fred.stlouisfed.org/series/SP500
+Unemployment rate:	https://fred.stlouisfed.org/series/UNRATE
+1-year yield:		https://fred.stlouisfed.org/series/gs1
+5-year yield:		https://fred.stlouisfed.org/series/gs5
+10-year yield:		https://fred.stlouisfed.org/series/gs10
+VIX:			https://fred.stlouisfed.org/series/VIXCLS
+VXO:			https://fred.stlouisfed.org/series/VXOCLS
